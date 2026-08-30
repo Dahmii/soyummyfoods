@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ClockIcon, PlusIcon, StarIcon, CheckIcon } from 'lucide-react';
+import { ClockIcon, PlusIcon, StarIcon, CheckIcon, MessageCircleIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { formatPrice } from '../../utils/currency';
 import { effectivePrice, type MenuItem } from '../../types/menu';
 import { useCartStore } from '../../hooks/useCartStore';
+import { buildItemEnquiryMessage, openWhatsApp } from '../../utils/whatsapp';
 import { cn } from '../../utils/cn';
 
 interface FoodCardProps {
@@ -105,16 +106,36 @@ export function FoodCard({ item, className }: FoodCardProps) {
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-3 border-t border-ink/10 pt-4">
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-xl font-bold text-ink">
-              {formatPrice(price)}
-            </span>
-            {isDiscounted ?
-            <span className="text-sm text-ink/40 line-through">
-                {formatPrice(item.price)}
+          <div>
+            {item.priceOnRequest ?
+            <span className="font-display text-base font-bold text-ink">
+                Price on request
               </span> :
+
+            <div className="flex items-baseline gap-2">
+                <span className="font-display text-xl font-bold text-ink">
+                  {formatPrice(price)}
+                </span>
+                {isDiscounted ?
+              <span className="text-sm text-ink/40 line-through">
+                    {formatPrice(item.price)}
+                  </span> :
+              null}
+              </div>
+            }
+            {item.portion ?
+            <p className="mt-0.5 text-xs font-medium text-ink/50">{item.portion}</p> :
             null}
           </div>
+
+          {item.priceOnRequest ?
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openWhatsApp(buildItemEnquiryMessage(item.name))}>
+            
+              <MessageCircleIcon className="h-4 w-4" /> Ask price
+            </Button> :
 
           <Button
             size="sm"
@@ -123,16 +144,17 @@ export function FoodCard({ item, className }: FoodCardProps) {
             disabled={!item.available}
             aria-label={`Add ${item.name} to cart`}>
             
-            {justAdded ?
+              {justAdded ?
             <>
-                <CheckIcon className="h-4 w-4" /> Added
-              </> :
+                  <CheckIcon className="h-4 w-4" /> Added
+                </> :
 
             <>
-                <PlusIcon className="h-4 w-4" /> Add to Cart
-              </>
+                  <PlusIcon className="h-4 w-4" /> Add to Cart
+                </>
             }
-          </Button>
+            </Button>
+          }
         </div>
       </div>
     </motion.article>);

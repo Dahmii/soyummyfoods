@@ -2,11 +2,12 @@ import { z } from 'zod';
 
 export const menuCategorySchema = z.enum([
 'rice-dishes',
+'beans-dishes',
+'yam-dishes',
+'starters-sides',
+'pepper-soups',
 'soups-stews',
-'grilled-fried',
-'sides-snacks',
-'drinks',
-'desserts']
+'proteins']
 );
 
 export type MenuCategory = z.infer<typeof menuCategorySchema>;
@@ -15,14 +16,18 @@ export const menuItemSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   description: z.string().min(1),
-  price: z.number().positive(),
-  image: z.string(),
+  price: z.number().nonnegative(),
+  image: z.string().min(1),
   category: menuCategorySchema,
   prepTimeMinutes: z.number().int().positive(),
   available: z.boolean(),
   tags: z.array(z.enum(['popular', 'new', 'special'])).default([]),
   rating: z.number().min(0).max(5),
-  specialPrice: z.number().positive().optional()
+  specialPrice: z.number().positive().optional(),
+  /** Items quoted by the kitchen — no fixed online price. */
+  priceOnRequest: z.boolean().optional(),
+  /** Portion note shown under the price, e.g. "5 pcs" or "1 litre bowl". */
+  portion: z.string().optional()
 });
 
 export type MenuItem = z.infer<typeof menuItemSchema>;
@@ -31,11 +36,12 @@ export const menuResponseSchema = z.array(menuItemSchema);
 
 export const CATEGORY_LABELS: Record<MenuCategory, string> = {
   'rice-dishes': 'Rice Dishes',
+  'beans-dishes': 'Beans Dishes',
+  'yam-dishes': 'Yam Dishes',
+  'starters-sides': 'Starters & Sides',
+  'pepper-soups': 'Pepper Soups',
   'soups-stews': 'Soups & Stews',
-  'grilled-fried': 'Grilled & Fried',
-  'sides-snacks': 'Sides & Snacks',
-  drinks: 'Drinks',
-  desserts: 'Desserts'
+  proteins: 'Proteins'
 };
 
 export const SORT_OPTIONS = [

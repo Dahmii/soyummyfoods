@@ -7,15 +7,18 @@ import {
   MailIcon,
   PhoneIcon,
   MapPinIcon,
-  GlobeIcon } from
+  GlobeIcon,
+  MessageCircleIcon } from
 'lucide-react';
 import { Logo } from './Logo';
+import { buildCateringEnquiryMessage, openWhatsApp } from '../../utils/whatsapp';
 
 const EXPLORE = [
 { to: '/', label: 'Home' },
 { to: '/menu', label: 'Our Menu' },
 { to: '/menu', label: 'Bulk Orders' },
 { to: '/blog', label: 'Blog' },
+{ to: '/allergy', label: 'Allergy Advisory' },
 { to: '/media', label: 'Get in Touch' }];
 
 
@@ -74,10 +77,27 @@ export function Footer() {
               </a>
             </li>
             <li className="flex items-start gap-2.5">
+              <MessageCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#25D366]" />
+              <button
+                type="button"
+                onClick={() => openWhatsApp(buildCateringEnquiryMessage())}
+                className="text-left hover:text-brand-400">
+                
+                Order or enquire on WhatsApp
+              </button>
+            </li>
+            <li className="flex items-start gap-2.5">
               <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
               <span>Unit 12, Southwark Enterprise Hub, London, SE1 0AA</span>
             </li>
           </ul>
+          <p className="mt-4 text-xs leading-relaxed text-white/40">
+            Our kitchen handles gluten, fish, crustaceans, soybeans, nuts, seeds and
+            eggs.{' '}
+            <Link to="/allergy" className="font-semibold text-white/70 hover:text-brand-400">
+              Allergy advisory notice
+            </Link>
+          </p>
         </div>
       </div>
 

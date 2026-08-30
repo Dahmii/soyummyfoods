@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { AlertTriangleIcon, FlameIcon, SparklesIcon, TagIcon } from 'lucide-react';
 import { FoodCard, FoodCardSkeleton } from '../components/menu/FoodCard';
 import { MenuFilters, type CategoryFilter } from '../components/menu/MenuFilters';
+import { CateringPriceList } from '../components/menu/CateringPriceList';
+import { AllergyNotice } from '../components/AllergyNotice';
 import { SectionHeading } from '../components/SectionHeading';
 import { Button } from '../components/ui/button';
 import { useMenu } from '../hooks/useMenu';
@@ -63,6 +65,8 @@ export function MenuPage() {
       </section>
 
       <div className="mx-auto max-w-7xl space-y-14 px-5 py-12 lg:px-8 lg:py-16">
+        <AllergyNotice />
+
         <MenuFilters
           query={query}
           onQueryChange={setQuery}
@@ -173,6 +177,8 @@ export function MenuPage() {
                 </div>
             }
             </section>
+
+            <CateringPriceList />
           </>
         }
       </div>

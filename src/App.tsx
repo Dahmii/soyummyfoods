@@ -8,6 +8,7 @@ import { HomePage } from './pages/Home';
 import { MenuPage } from './pages/Menu';
 import { MediaPage } from './pages/Media';
 import { BlogPage } from './pages/Blog';
+import { AllergyPage } from './pages/Allergy';
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/media" element={<MediaPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/allergy" element={<AllergyPage />} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>

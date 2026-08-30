@@ -10,6 +10,7 @@ import {
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { FoodCard } from '../components/menu/FoodCard';
+import { AllergyNotice } from '../components/AllergyNotice';
 import { SectionHeading } from '../components/SectionHeading';
 import { MENU_ITEMS } from '../data/menu';
 import { IMAGERY } from '../data/site';
@@ -52,7 +53,7 @@ export function HomePage() {
             </h1>
             <p className="mt-5 max-w-xl text-sm leading-relaxed text-ink/60 sm:text-base">
               Savor carefully crafted, authentic Nigerian culinary classics. From
-              aromatic smoky Party Jollof to perfectly seasoned Beef Suya, we bring the
+              aromatic smoky Jollof Rice to rich Ofada Rice &amp; Ayamase, we bring the
               vibrant flavours of home directly to your table with unparalleled
               convenience and fresh ingredients.
             </p>
@@ -61,13 +62,7 @@ export function HomePage() {
                 <Link to="/menu">Order Now</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <a 
-                  href="https://wa.me/0123456789" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  Bulk Order
-                </a>
+                <Link to="/menu">Bulk Order</Link>
               </Button>
             </div>
           </motion.div>
@@ -160,6 +155,13 @@ export function HomePage() {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Allergy advisory */}
+      <section className="bg-cream">
+        <div className="mx-auto max-w-7xl px-5 pt-10 lg:px-8">
+          <AllergyNotice />
         </div>
       </section>
 

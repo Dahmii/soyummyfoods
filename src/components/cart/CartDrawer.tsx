@@ -6,12 +6,15 @@ import {
   ShoppingBagIcon,
   Trash2Icon,
   CheckCircle2Icon,
-  TruckIcon } from
+  TruckIcon,
+  MessageCircleIcon } from
 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '../ui/sheet';
 import { Button } from '../ui/button';
-import { CheckoutForm } from './CheckoutForm';
+import { CheckoutForm, type CheckoutValues } from './CheckoutForm';
 import { formatPrice } from '../../utils/currency';
+import { buildOrderMessage, openWhatsApp } from '../../utils/whatsapp';
+import type { CartLine } from '../../hooks/useCartStore';
 import {
   DELIVERY_FEE,
   FREE_DELIVERY_THRESHOLD,
@@ -21,6 +24,14 @@ import {
 '../../hooks/useCartStore';
 
 type Stage = 'basket' | 'checkout' | 'confirmed';
+
+interface PlacedOrder {
+  lines: CartLine[];
+  subtotal: number;
+  delivery: number;
+  total: number;
+  customer: CheckoutValues;
+}
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen);
@@ -32,6 +43,7 @@ export function CartDrawer() {
   const clear = useCartStore((state) => state.clear);
 
   const [stage, setStage] = useState<Stage>('basket');
+  const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
   const itemCount = selectItemCount({ lines });
   const subtotal = selectSubtotal({ lines });
   const delivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0 ? 0 : DELIVERY_FEE;
@@ -64,10 +76,29 @@ export function CartDrawer() {
             <CheckCircle2Icon className="h-14 w-14 text-emerald-600" />
             <h3 className="font-display text-2xl font-bold text-ink">Thank you!</h3>
             <p className="text-sm leading-relaxed text-ink/60">
-              We've sent a confirmation email with your delivery window. Your dishes
-              are being cooked fresh to order.
+              We've sent a confirmation email with your delivery window. Send the order
+              to our WhatsApp to settle payment or adjust your delivery address.
             </p>
-            <Button onClick={closeCart} size="lg" className="mt-2">
+            {placedOrder ?
+          <Button
+            size="lg"
+            className="mt-2 w-full bg-[#25D366] hover:bg-[#1EBE57]"
+            onClick={() =>
+            openWhatsApp(
+              buildOrderMessage({
+                lines: placedOrder.lines,
+                subtotal: placedOrder.subtotal,
+                delivery: placedOrder.delivery,
+                total: placedOrder.total,
+                customer: placedOrder.customer
+              })
+            )
+            }>
+            
+                <MessageCircleIcon className="h-4 w-4" /> Finalise on WhatsApp
+              </Button> :
+          null}
+            <Button onClick={closeCart} variant="ghost" size="sm">
               Continue browsing
             </Button>
           </div> :
@@ -75,7 +106,8 @@ export function CartDrawer() {
         <CheckoutForm
           total={total}
           onBack={() => setStage('basket')}
-          onSuccess={() => {
+          onSuccess={(customer) => {
+            setPlacedOrder({ lines, subtotal, delivery, total, customer });
             clear();
             setStage('confirmed');
           }} /> :
@@ -185,6 +217,19 @@ export function CartDrawer() {
               <Button size="lg" className="w-full" onClick={() => setStage('checkout')}>
                 Checkout
               </Button>
+              <Button
+              size="lg"
+              className="w-full bg-[#25D366] hover:bg-[#1EBE57]"
+              onClick={() =>
+              openWhatsApp(buildOrderMessage({ lines, subtotal, delivery, total }))
+              }>
+              
+                <MessageCircleIcon className="h-4 w-4" /> Order on WhatsApp
+              </Button>
+              <p className="text-center text-xs leading-relaxed text-ink/50">
+                Sending on WhatsApp lets you confirm payment and delivery address
+                directly with our team.
+              </p>
               <Button variant="ghost" size="sm" className="w-full" onClick={clear}>
                 Clear basket
               </Button>

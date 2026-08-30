@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -102,6 +103,17 @@ export function CheckoutForm({ total, onSuccess, onBack }: CheckoutFormProps) {
             {...register('notes')} />
           
         </Field>
+
+        <p className="text-xs leading-relaxed text-ink/50">
+          Severe allergy? Tell us here and read our{' '}
+          <Link
+            to="/allergy"
+            className="font-semibold text-brand-600 underline-offset-2 hover:underline">
+            
+            allergy advisory notice
+          </Link>{' '}
+          before ordering.
+        </p>
 
         {submitError ?
         <p
