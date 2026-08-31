@@ -2,8 +2,8 @@ import { formatPrice } from './currency';
 import type { CartLine } from '../hooks/useCartStore';
 
 /** Business WhatsApp number in international format, digits only. */
-export const WHATSAPP_NUMBER = '442079460192';
-export const WHATSAPP_DISPLAY = '+44 20 7946 0192';
+export const WHATSAPP_NUMBER = '447311809250';
+export const WHATSAPP_DISPLAY = '+44 73 1180 9250';
 
 function toUrl(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
