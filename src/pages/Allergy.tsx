@@ -116,7 +116,7 @@ export function AllergyPage() {
               <MessageCircleIcon className="h-4 w-4" /> Message us on WhatsApp
             </Button>
             <a
-              href="tel:+442079460192"
+              href="tel:+447311809250"
               className="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-ink/70 transition-colors hover:text-brand-600">
               
               <PhoneIcon className="h-4 w-4 text-brand-500" /> {WHATSAPP_DISPLAY}
