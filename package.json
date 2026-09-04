@@ -10,21 +10,22 @@
     "preview": "npx vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@hookform/resolvers": "^3.9.0",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-slot": "latest",
+    "@supabase/supabase-js": "^2.115.0",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "framer-motion": "^11.5.4",
+    "lucide-react": "0.522.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@emotion/react": "^11.13.3",
+    "react-hook-form": "^7.53.0",
     "react-router-dom": "^6.26.2",
-    "clsx": "latest",
     "tailwind-merge": "latest",
     "zod": "^3.23.8",
-    "zustand": "latest",
-    "@radix-ui/react-slot": "latest",
-    "class-variance-authority": "latest",
-    "lucide-react": "0.522.0",
-    "@radix-ui/react-dialog": "^1.1.6",
-    "framer-motion": "^11.5.4",
-    "react-hook-form": "^7.53.0",
-    "@hookform/resolvers": "^3.9.0"
+    "zustand": "latest"
   },
   "devDependencies": {
     "@types/node": "^20.11.18",
@@ -33,13 +34,13 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "latest",
     "eslint": "^8.50.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.1",
-    "typescript": "^5.5.4",
-    "vite": "^5.2.0",
+    "postcss": "latest",
     "tailwindcss": "3.4.17",
-    "autoprefixer": "latest",
-    "postcss": "latest"
+    "typescript": "^5.5.4",
+    "vite": "^5.2.0"
   }
 }
