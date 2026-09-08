@@ -13,7 +13,7 @@ export function AdminLayout() {
           <Link to="/admin" className="font-display text-xl font-bold text-ink">
             SoYummy Admin
           </Link>
-          <div className="flex items-center gap-3"><nav className="flex gap-3 text-sm"><Link to="/admin/catalog/categories" className="text-ink/70 hover:text-brand-600">Categories</Link><Link to="/admin/catalog/products" className="text-ink/70 hover:text-brand-600">Products</Link></nav><Button size="sm" variant="outline" onClick={() => void signOut()}>Log out</Button></div>
+          <div className="flex items-center gap-3"><nav className="flex gap-3 text-sm"><Link to="/admin/catalog/categories" className="text-ink/70 hover:text-brand-600">Categories</Link><Link to="/admin/catalog/products" className="text-ink/70 hover:text-brand-600">Products</Link><Link to="/admin/delivery-zones" className="text-ink/70 hover:text-brand-600">Delivery zones</Link><Link to="/admin/settings/business" className="text-ink/70 hover:text-brand-600">Business settings</Link></nav><Button size="sm" variant="outline" onClick={() => void signOut()}>Log out</Button></div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-5 py-10 lg:px-8">

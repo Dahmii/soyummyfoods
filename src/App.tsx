@@ -16,6 +16,9 @@ import { AdminDashboardPage } from './pages/admin/Dashboard';
 import { AdminCategoriesPage } from './pages/admin/CatalogCategories';
 import { AdminProductsPage } from './pages/admin/CatalogProducts';
 import { AdminProductEditorPage } from './pages/admin/CatalogProductEditor';
+import { AdminBusinessSettingsPage } from './pages/admin/BusinessSettings';
+import { AdminDeliveryZonesPage } from './pages/admin/DeliveryZones';
+import { AdminDeliveryZoneEditorPage } from './pages/admin/DeliveryZoneEditor';
 
 export function App() {
   return (
@@ -32,6 +35,10 @@ export function App() {
                 <Route path="catalog/products" element={<AdminProductsPage />} />
                 <Route path="catalog/products/new" element={<AdminProductEditorPage />} />
                 <Route path="catalog/products/:productId/edit" element={<AdminProductEditorPage />} />
+                <Route path="settings/business" element={<AdminBusinessSettingsPage />} />
+                <Route path="delivery-zones" element={<AdminDeliveryZonesPage />} />
+                <Route path="delivery-zones/new" element={<AdminDeliveryZoneEditorPage />} />
+                <Route path="delivery-zones/:zoneId/edit" element={<AdminDeliveryZoneEditorPage />} />
               </Route>
             </Route>
             <Route path="/" element={<HomePage />} />
