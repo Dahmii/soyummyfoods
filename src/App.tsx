@@ -13,6 +13,9 @@ import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
 import { AdminDashboardPage } from './pages/admin/Dashboard';
+import { AdminCategoriesPage } from './pages/admin/CatalogCategories';
+import { AdminProductsPage } from './pages/admin/CatalogProducts';
+import { AdminProductEditorPage } from './pages/admin/CatalogProductEditor';
 
 export function App() {
   return (
@@ -25,6 +28,10 @@ export function App() {
             <Route path="/admin" element={<RequireAdmin />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboardPage />} />
+                <Route path="catalog/categories" element={<AdminCategoriesPage />} />
+                <Route path="catalog/products" element={<AdminProductsPage />} />
+                <Route path="catalog/products/new" element={<AdminProductEditorPage />} />
+                <Route path="catalog/products/:productId/edit" element={<AdminProductEditorPage />} />
               </Route>
             </Route>
             <Route path="/" element={<HomePage />} />

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useAdminAuth } from '../../features/admin/AdminAuthContext';
+import { Link } from 'react-router-dom';
+import { Button } from '../../components/ui/button';
 
 export function AdminDashboardPage() {
   const { roles, session } = useAdminAuth();
@@ -14,6 +16,7 @@ export function AdminDashboardPage() {
       <p className="mt-5 text-sm font-medium text-ink/70">
         Role{roles.length === 1 ? '' : 's'}: {roles.join(', ')}
       </p>
+      <div className="mt-6 flex gap-3"><Button asChild><Link to="/admin/catalog/products">Manage products</Link></Button><Button asChild variant="outline"><Link to="/admin/catalog/categories">Manage categories</Link></Button></div>
     </section>
   );
 }
