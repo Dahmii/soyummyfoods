@@ -16,7 +16,7 @@ export function AdminDashboardPage() {
       <p className="mt-5 text-sm font-medium text-ink/70">
         Role{roles.length === 1 ? '' : 's'}: {roles.join(', ')}
       </p>
-      <div className="mt-6 flex flex-wrap gap-3"><Button asChild><Link to="/admin/catalog/products">Manage products</Link></Button><Button asChild variant="outline"><Link to="/admin/catalog/categories">Manage categories</Link></Button><Button asChild variant="outline"><Link to="/admin/delivery-zones">Delivery zones</Link></Button><Button asChild variant="outline"><Link to="/admin/settings/business">Business settings</Link></Button></div>
+      <div className="mt-6 flex flex-wrap gap-3"><Button asChild><Link to="/admin/catalog/products">Manage products</Link></Button><Button asChild variant="outline"><Link to="/admin/catalog/categories">Manage categories</Link></Button><Button asChild variant="outline"><Link to="/admin/inventory">Inventory</Link></Button><Button asChild variant="outline"><Link to="/admin/delivery-zones">Delivery zones</Link></Button><Button asChild variant="outline"><Link to="/admin/settings/business">Business settings</Link></Button></div>
     </section>
   );
 }
