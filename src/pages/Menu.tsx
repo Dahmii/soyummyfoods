@@ -13,20 +13,20 @@ function sortItems(items: MenuItem[], sort: SortOption): MenuItem[] {
   const copy = [...items];
   switch (sort) {
     case 'price-asc':
-      return copy.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+      return copy.sort((a, b) => (effectivePrice(a) ?? Infinity) - (effectivePrice(b) ?? Infinity));
     case 'price-desc':
-      return copy.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+      return copy.sort((a, b) => (effectivePrice(b) ?? -Infinity) - (effectivePrice(a) ?? -Infinity));
     case 'prep-time':
       return copy.sort((a, b) => a.prepTimeMinutes - b.prepTimeMinutes);
     default:
       return copy.sort(
-        (a, b) => Number(b.available) - Number(a.available) || b.rating - a.rating
+        (a, b) => Number(b.available) - Number(a.available) || (b.rating ?? -Infinity) - (a.rating ?? -Infinity)
       );
   }
 }
 
 export function MenuPage() {
-  const { items, isLoading, error, retry } = useMenu();
+  const { items, categories, isLoading, error, retry } = useMenu();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [sort, setSort] = useState<SortOption>('featured');
@@ -74,7 +74,8 @@ export function MenuPage() {
           onCategoryChange={setCategory}
           sort={sort}
           onSortChange={setSort}
-          resultCount={filtered.length} />
+          resultCount={filtered.length}
+          categories={categories} />
         
 
         {error ?

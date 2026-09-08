@@ -1,4 +1,11 @@
-import { menuResponseSchema, type MenuItem } from '../types/menu';
+import {
+  menuResponseSchema,
+  type MenuCatalog,
+  type MenuCategoryOption,
+  type MenuItem } from
+'../types/menu';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { fetchMenuFromSupabase } from '../repositories/menuRepository';
 
 const IMAGES = {
   jollof: "/4474ba82-cf02-4264-9b7b-24159e623a2a.jpg",
@@ -112,7 +119,7 @@ const RAW_MENU: unknown[] = [
   name: 'Coconut Rice',
   description:
   'Fragrant rice simmered in fresh coconut milk. Priced to portion — message the kitchen for a quote.',
-  price: 0,
+  price: null,
   image: IMAGES.friedrice,
   category: 'rice-dishes',
   prepTimeMinutes: 40,
@@ -568,8 +575,27 @@ const RAW_MENU: unknown[] = [
 /** Validated at module load so malformed menu data fails loudly and early. */
 export const MENU_ITEMS: MenuItem[] = menuResponseSchema.parse(RAW_MENU);
 
+/** Presentation-only metadata retained until ratings are explicitly modelled. */
+export const MENU_ITEM_RATINGS: Readonly<Record<string, number>> = Object.fromEntries(
+  MENU_ITEMS.flatMap((item) => item.rating === null || item.rating === undefined ? [] : [[item.id, item.rating]])
+);
+
+const LEGACY_MENU_CATEGORIES: MenuCategoryOption[] = [
+  { slug: 'rice-dishes', name: 'Rice Dishes', displayOrder: 0 },
+  { slug: 'beans-dishes', name: 'Beans Dishes', displayOrder: 1 },
+  { slug: 'yam-dishes', name: 'Yam Dishes', displayOrder: 2 },
+  { slug: 'starters-sides', name: 'Starters & Sides', displayOrder: 3 },
+  { slug: 'pepper-soups', name: 'Pepper Soups', displayOrder: 4 },
+  { slug: 'soups-stews', name: 'Soups & Stews', displayOrder: 5 },
+  { slug: 'proteins', name: 'Proteins', displayOrder: 6 }
+];
+
 /** Simulates an async menu fetch so the UI can exercise loading and error states. */
-export function fetchMenu(signal?: AbortSignal): Promise<MenuItem[]> {
+export function fetchMenu(signal?: AbortSignal): Promise<MenuCatalog> {
+  if (isSupabaseConfigured()) {
+    return fetchMenuFromSupabase(signal, MENU_ITEM_RATINGS);
+  }
+
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => {
       const parsed = menuResponseSchema.safeParse(RAW_MENU);
@@ -577,7 +603,7 @@ export function fetchMenu(signal?: AbortSignal): Promise<MenuItem[]> {
         reject(new Error('The menu could not be loaded right now.'));
         return;
       }
-      resolve(parsed.data);
+      resolve({ items: parsed.data, categories: LEGACY_MENU_CATEGORIES });
     }, 650);
 
     signal?.addEventListener('abort', () => {

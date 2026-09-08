@@ -29,6 +29,8 @@ export const useCartStore = create<CartState>((set) => ({
   lastAddedId: null,
   addItem: (item) =>
   set((state) => {
+    const unitPrice = effectivePrice(item);
+    if (unitPrice === null) return state;
     const existing = state.lines.find((line) => line.id === item.id);
     const lines = existing ?
     state.lines.map((line) =>
@@ -40,7 +42,7 @@ export const useCartStore = create<CartState>((set) => ({
       id: item.id,
       name: item.name,
       image: item.image,
-      unitPrice: effectivePrice(item),
+      unitPrice,
       quantity: 1
     }];
 

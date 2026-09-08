@@ -26,7 +26,7 @@ export function FoodCard({ item, className }: FoodCardProps) {
   }, [justAdded]);
 
   const price = effectivePrice(item);
-  const isDiscounted = price < item.price;
+  const isDiscounted = price !== null && item.price !== null && price < item.price;
 
   function handleAdd() {
     addItem(item);
@@ -64,10 +64,11 @@ export function FoodCard({ item, className }: FoodCardProps) {
           {item.tags.includes('new') ? <Badge variant="dark">New</Badge> : null}
         </div>
 
+        {item.rating === null || item.rating === undefined ? null :
         <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-ink backdrop-blur">
           <StarIcon className="h-3 w-3 fill-brand-500 text-brand-500" />
           {item.rating.toFixed(1)}
-        </span>
+        </span>}
 
         {!item.available ?
         <div className="absolute inset-0 flex items-center justify-center bg-ink/50">
@@ -114,11 +115,11 @@ export function FoodCard({ item, className }: FoodCardProps) {
 
             <div className="flex items-baseline gap-2">
                 <span className="font-display text-xl font-bold text-ink">
-                  {formatPrice(price)}
+                  {price === null ? 'Price on request' : formatPrice(price)}
                 </span>
                 {isDiscounted ?
               <span className="text-sm text-ink/40 line-through">
-                    {formatPrice(item.price)}
+                    {item.price === null ? null : formatPrice(item.price)}
                   </span> :
               null}
               </div>

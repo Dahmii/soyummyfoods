@@ -2,15 +2,10 @@ import React from 'react';
 import { SearchIcon, XIcon } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
-import {
-  CATEGORY_LABELS,
-  SORT_OPTIONS,
-  type MenuCategory,
-  type SortOption } from
-'../../types/menu';
+import { SORT_OPTIONS, type MenuCategoryOption, type SortOption } from '../../types/menu';
 import { cn } from '../../utils/cn';
 
-export type CategoryFilter = MenuCategory | 'all';
+export type CategoryFilter = string | 'all';
 
 interface MenuFiltersProps {
   query: string;
@@ -20,12 +15,8 @@ interface MenuFiltersProps {
   sort: SortOption;
   onSortChange: (value: SortOption) => void;
   resultCount: number;
+  categories: MenuCategoryOption[];
 }
-
-const CATEGORIES: CategoryFilter[] = [
-'all',
-...(Object.keys(CATEGORY_LABELS) as MenuCategory[])];
-
 
 export function MenuFilters({
   query,
@@ -34,8 +25,11 @@ export function MenuFilters({
   onCategoryChange,
   sort,
   onSortChange,
-  resultCount
+  resultCount,
+  categories
 }: MenuFiltersProps) {
+  const categoryFilters = [{ slug: 'all', name: 'All Dishes' }, ...categories];
+
   return (
     <section
       aria-label="Menu filters"
@@ -84,7 +78,8 @@ export function MenuFilters({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {CATEGORIES.map((value) => {
+        {categoryFilters.map((entry) => {
+          const value = entry.slug;
           const isActive = category === value;
           return (
             <button
@@ -99,7 +94,7 @@ export function MenuFilters({
                 'border-ink/10 bg-white text-ink/70 hover:border-brand-300 hover:text-brand-600'
               )}>
               
-              {value === 'all' ? 'All Dishes' : CATEGORY_LABELS[value]}
+              {entry.name}
             </button>);
 
         })}

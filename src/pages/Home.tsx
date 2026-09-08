@@ -12,8 +12,8 @@ import { Badge } from '../components/ui/badge';
 import { FoodCard } from '../components/menu/FoodCard';
 import { AllergyNotice } from '../components/AllergyNotice';
 import { SectionHeading } from '../components/SectionHeading';
-import { MENU_ITEMS } from '../data/menu';
 import { IMAGERY } from '../data/site';
+import { useMenu } from '../hooks/useMenu';
 
 const TRUST_SIGNALS = [
 {
@@ -31,7 +31,8 @@ const TRUST_SIGNALS = [
 
 
 export function HomePage() {
-  const signatureDishes = MENU_ITEMS.filter((item) =>
+  const { items } = useMenu();
+  const signatureDishes = items.filter((item) =>
   item.tags.includes('popular')
   ).slice(0, 4);
 

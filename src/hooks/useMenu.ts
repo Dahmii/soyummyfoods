@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchMenu } from '../data/menu';
-import type { MenuItem } from '../types/menu';
+import type { MenuCategoryOption, MenuItem } from '../types/menu';
 
 interface UseMenuResult {
   items: MenuItem[];
+  categories: MenuCategoryOption[];
   isLoading: boolean;
   error: string | null;
   retry: () => void;
@@ -11,6 +12,7 @@ interface UseMenuResult {
 
 export function useMenu(): UseMenuResult {
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<MenuCategoryOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -22,7 +24,8 @@ export function useMenu(): UseMenuResult {
 
     fetchMenu(controller.signal).
     then((data) => {
-      setItems(data);
+      setItems(data.items);
+      setCategories(data.categories);
       setIsLoading(false);
     }).
     catch((cause: unknown) => {
@@ -40,5 +43,5 @@ export function useMenu(): UseMenuResult {
 
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
 
-  return { items, isLoading, error, retry };
+  return { items, categories, isLoading, error, retry };
 }

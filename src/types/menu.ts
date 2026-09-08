@@ -1,14 +1,6 @@
 import { z } from 'zod';
 
-export const menuCategorySchema = z.enum([
-'rice-dishes',
-'beans-dishes',
-'yam-dishes',
-'starters-sides',
-'pepper-soups',
-'soups-stews',
-'proteins']
-);
+export const menuCategorySchema = z.string().trim().min(1);
 
 export type MenuCategory = z.infer<typeof menuCategorySchema>;
 
@@ -16,13 +8,13 @@ export const menuItemSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   description: z.string().min(1),
-  price: z.number().nonnegative(),
+  price: z.number().nonnegative().nullable(),
   image: z.string().min(1),
   category: menuCategorySchema,
   prepTimeMinutes: z.number().int().positive(),
   available: z.boolean(),
   tags: z.array(z.enum(['popular', 'new', 'special'])).default([]),
-  rating: z.number().min(0).max(5),
+  rating: z.number().min(0).max(5).nullable().optional(),
   specialPrice: z.number().positive().optional(),
   /** Items quoted by the kitchen — no fixed online price. */
   priceOnRequest: z.boolean().optional(),
@@ -34,15 +26,18 @@ export type MenuItem = z.infer<typeof menuItemSchema>;
 
 export const menuResponseSchema = z.array(menuItemSchema);
 
-export const CATEGORY_LABELS: Record<MenuCategory, string> = {
-  'rice-dishes': 'Rice Dishes',
-  'beans-dishes': 'Beans Dishes',
-  'yam-dishes': 'Yam Dishes',
-  'starters-sides': 'Starters & Sides',
-  'pepper-soups': 'Pepper Soups',
-  'soups-stews': 'Soups & Stews',
-  proteins: 'Proteins'
-};
+export const menuCategoryOptionSchema = z.object({
+  slug: menuCategorySchema,
+  name: z.string().trim().min(1),
+  displayOrder: z.number().int().nonnegative()
+});
+
+export type MenuCategoryOption = z.infer<typeof menuCategoryOptionSchema>;
+
+export interface MenuCatalog {
+  items: MenuItem[];
+  categories: MenuCategoryOption[];
+}
 
 export const SORT_OPTIONS = [
 { value: 'featured', label: 'Featured' },
@@ -53,6 +48,6 @@ const;
 
 export type SortOption = (typeof SORT_OPTIONS)[number]['value'];
 
-export function effectivePrice(item: MenuItem): number {
+export function effectivePrice(item: MenuItem): number | null {
   return item.specialPrice ?? item.price;
 }
