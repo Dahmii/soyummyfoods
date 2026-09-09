@@ -6,18 +6,16 @@ import {
   ShoppingBagIcon,
   Trash2Icon,
   CheckCircle2Icon,
-  TruckIcon,
   MessageCircleIcon } from
 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '../ui/sheet';
 import { Button } from '../ui/button';
-import { CheckoutForm, type CheckoutValues } from './CheckoutForm';
+import { CheckoutForm } from './CheckoutForm';
 import { formatPrice } from '../../utils/currency';
-import { buildOrderMessage, openWhatsApp } from '../../utils/whatsapp';
+import { buildPaymentHelpMessage, openWhatsApp } from '../../utils/whatsapp';
+import type { CheckoutResponse } from '../../types/order';
 import type { CartLine } from '../../hooks/useCartStore';
 import {
-  DELIVERY_FEE,
-  FREE_DELIVERY_THRESHOLD,
   selectItemCount,
   selectSubtotal,
   useCartStore } from
@@ -30,7 +28,8 @@ interface PlacedOrder {
   subtotal: number;
   delivery: number;
   total: number;
-  customer: CheckoutValues;
+  orderNumber?: string;
+  reservationExpiresAt?: string;
 }
 
 export function CartDrawer() {
@@ -46,8 +45,6 @@ export function CartDrawer() {
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
   const itemCount = selectItemCount({ lines });
   const subtotal = selectSubtotal({ lines });
-  const delivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0 ? 0 : DELIVERY_FEE;
-  const total = subtotal + delivery;
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,7 +63,7 @@ export function CartDrawer() {
           </SheetTitle>
           <SheetDescription id="cart-description" className="mt-1 text-sm text-ink/60">
             {stage === 'confirmed' ?
-            'Our kitchen has started prepping your order.' :
+            'Your order is awaiting payment.' :
             `${itemCount} ${itemCount === 1 ? 'item' : 'items'} · delivered across the UK`}
           </SheetDescription>
         </header>
@@ -76,26 +73,20 @@ export function CartDrawer() {
             <CheckCircle2Icon className="h-14 w-14 text-emerald-600" />
             <h3 className="font-display text-2xl font-bold text-ink">Thank you!</h3>
             <p className="text-sm leading-relaxed text-ink/60">
-              We've sent a confirmation email with your delivery window. Send the order
-              to our WhatsApp to settle payment or adjust your delivery address.
+              Order {placedOrder?.orderNumber ?? ''} has been received. It is awaiting payment and will not be prepared until payment is confirmed.
             </p>
+            {placedOrder ?
+            <p className="font-display text-lg font-bold text-ink">Total: {formatPrice(placedOrder.total)}</p> :
+            null}
             {placedOrder ?
           <Button
             size="lg"
             className="mt-2 w-full bg-[#25D366] hover:bg-[#1EBE57]"
             onClick={() =>
-            openWhatsApp(
-              buildOrderMessage({
-                lines: placedOrder.lines,
-                subtotal: placedOrder.subtotal,
-                delivery: placedOrder.delivery,
-                total: placedOrder.total,
-                customer: placedOrder.customer
-              })
-            )
+            openWhatsApp(buildPaymentHelpMessage(placedOrder.orderNumber ?? ''))
             }>
             
-                <MessageCircleIcon className="h-4 w-4" /> Finalise on WhatsApp
+                <MessageCircleIcon className="h-4 w-4" /> Ask for payment details
               </Button> :
           null}
             <Button onClick={closeCart} variant="ghost" size="sm">
@@ -104,10 +95,10 @@ export function CartDrawer() {
           </div> :
         stage === 'checkout' ?
         <CheckoutForm
-          total={total}
+          subtotal={subtotal} lines={lines}
           onBack={() => setStage('basket')}
-          onSuccess={(customer) => {
-            setPlacedOrder({ lines, subtotal, delivery, total, customer });
+          onSuccess={(order: CheckoutResponse) => {
+            setPlacedOrder({ lines, subtotal: order.subtotal, delivery: order.deliveryFee, total: order.total, orderNumber: order.orderNumber, reservationExpiresAt: order.reservationExpiresAt });
             clear();
             setStage('confirmed');
           }} /> :
@@ -196,40 +187,14 @@ export function CartDrawer() {
                 <span>Subtotal</span>
                 <span className="font-medium text-ink">{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm text-ink/60">
-                <span className="inline-flex items-center gap-1.5">
-                  <TruckIcon className="h-4 w-4 text-brand-500" /> Delivery
-                </span>
-                <span className="font-medium text-ink">
-                  {delivery === 0 ? 'Free' : formatPrice(delivery)}
-                </span>
-              </div>
-              {subtotal < FREE_DELIVERY_THRESHOLD ?
-            <p className="rounded-xl bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700">
-                  Spend {formatPrice(FREE_DELIVERY_THRESHOLD - subtotal)} more for free
-                  UK delivery.
-                </p> :
-            null}
               <div className="flex items-center justify-between border-t border-ink/10 pt-3 font-display text-lg font-bold text-ink">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
+                <span>Items subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
+              <p className="text-xs leading-relaxed text-ink/50">Delivery fee and final total are calculated securely after you provide your delivery address.</p>
               <Button size="lg" className="w-full" onClick={() => setStage('checkout')}>
                 Checkout
               </Button>
-              <Button
-              size="lg"
-              className="w-full bg-[#25D366] hover:bg-[#1EBE57]"
-              onClick={() =>
-              openWhatsApp(buildOrderMessage({ lines, subtotal, delivery, total }))
-              }>
-              
-                <MessageCircleIcon className="h-4 w-4" /> Order on WhatsApp
-              </Button>
-              <p className="text-center text-xs leading-relaxed text-ink/50">
-                Sending on WhatsApp lets you confirm payment and delivery address
-                directly with our team.
-              </p>
               <Button variant="ghost" size="sm" className="w-full" onClick={clear}>
                 Clear basket
               </Button>

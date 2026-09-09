@@ -72,6 +72,10 @@ export function buildItemEnquiryMessage(itemName: string): string {
   return `Hello SoYummy Foods! Please could you quote me a price for ${itemName}?`;
 }
 
+export function buildPaymentHelpMessage(orderNumber: string): string {
+  return `Hi, I've just placed order ${orderNumber} on the So Yummy Foods website. I'd like the payment details please.`;
+}
+
 export function buildCateringEnquiryMessage(itemName?: string): string {
   return itemName ?
   `Hello SoYummy Foods! I'd like to place a bulk catering order for ${itemName}. Please could you confirm tray sizes, availability and payment details?` :

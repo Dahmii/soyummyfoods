@@ -18,6 +18,7 @@ interface ProductImageRow {
 }
 
 interface ProductRow {
+  id: string;
   slug: string;
   name: string;
   description: string;
@@ -59,7 +60,7 @@ export async function fetchMenuFromSupabase(
   const { data, error } = await supabase
     .from('products')
     .select(
-      'slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, is_primary, display_order)'
+      'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, is_primary, display_order)'
     )
     .eq('status', 'active')
     .order('display_order')
@@ -80,6 +81,7 @@ export async function fetchMenuFromSupabase(
 
       return {
         id: product.slug,
+        databaseId: product.id,
         name: product.name,
         description: product.description,
         price: product.base_price === null ? null : Number(product.base_price),

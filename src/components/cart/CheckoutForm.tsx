@@ -7,13 +7,16 @@ import { Loader2Icon, AlertCircleIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Field, Input, Textarea } from '../ui/input';
 import { formatPrice } from '../../utils/currency';
+import type { CartLine } from '../../hooks/useCartStore';
+import { CheckoutError, createGuestOrder } from '../../repositories/checkoutRepository';
+import type { CheckoutResponse } from '../../types/order';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Please enter your full name'),
   email: z.string().email('Enter a valid email address'),
   phone: z.
   string().
-  min(10, 'Enter a valid UK phone number').
+  min(7, 'Enter a valid phone number').
   regex(/^[0-9+()\s-]+$/, 'Phone can only contain digits and + ( ) -'),
   postcode: z.
   string().
@@ -22,19 +25,20 @@ const checkoutSchema = z.object({
     'Enter a valid UK postcode'
   ),
   address: z.string().min(6, 'Enter your delivery address'),
-  notes: z.string().max(280, 'Keep notes under 280 characters').optional()
+  notes: z.string().max(500, 'Keep notes under 500 characters').optional()
 });
 
 export type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 interface CheckoutFormProps {
-  total: number;
-  onSuccess: (values: CheckoutValues) => void;
+  subtotal: number; lines: CartLine[];
+  onSuccess: (order: CheckoutResponse) => void;
   onBack: () => void;
 }
 
-export function CheckoutForm({ total, onSuccess, onBack }: CheckoutFormProps) {
+export function CheckoutForm({ subtotal, lines, onSuccess, onBack }: CheckoutFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
   const {
     register,
     handleSubmit,
@@ -54,10 +58,17 @@ export function CheckoutForm({ total, onSuccess, onBack }: CheckoutFormProps) {
   async function onSubmit(values: CheckoutValues) {
     setSubmitError(null);
     try {
-      await new Promise((resolve) => window.setTimeout(resolve, 900));
-      onSuccess(values);
-    } catch {
-      setSubmitError('We could not place your order. Please try again.');
+      const checkoutLines = lines.map((line) => {
+        if (!line.productId) throw new Error('Checkout is unavailable until the live menu has loaded.');
+        return { productId: line.productId, quantity: line.quantity };
+      });
+      const order = await createGuestOrder({ lines: checkoutLines, customerName: values.fullName, email: values.email, phone: values.phone, deliveryAddress: values.address, postcode: values.postcode, customerNote: values.notes?.trim() || null, idempotencyKey });
+      onSuccess(order);
+    } catch (cause) {
+      if (cause instanceof CheckoutError && cause.code === 'expired_idempotency_key') {
+        setIdempotencyKey(crypto.randomUUID());
+      }
+      setSubmitError(cause instanceof Error ? cause.message : 'We could not place your order. Please try again.');
     }
   }
 
@@ -128,9 +139,10 @@ export function CheckoutForm({ total, onSuccess, onBack }: CheckoutFormProps) {
 
       <div className="space-y-3 border-t border-ink/10 bg-white px-5 py-4">
         <div className="flex items-center justify-between font-display text-lg font-bold text-ink">
-          <span>Total</span>
-          <span>{formatPrice(total)}</span>
+          <span>Items subtotal</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
+        <p className="text-xs leading-relaxed text-ink/50">Your delivery fee and final total will be calculated securely when you place the order.</p>
         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ?
           <>

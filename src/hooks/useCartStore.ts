@@ -3,6 +3,7 @@ import { effectivePrice, type MenuItem } from '../types/menu';
 
 export interface CartLine {
   id: string;
+  productId?: string;
   name: string;
   image: string;
   unitPrice: number;
@@ -40,6 +41,7 @@ export const useCartStore = create<CartState>((set) => ({
     ...state.lines,
     {
       id: item.id,
+      productId: item.databaseId,
       name: item.name,
       image: item.image,
       unitPrice,
@@ -80,6 +82,3 @@ export function selectSubtotal(state: {lines: CartLine[];}): number {
     0
   );
 }
-
-export const DELIVERY_FEE = 3.5;
-export const FREE_DELIVERY_THRESHOLD = 40;
