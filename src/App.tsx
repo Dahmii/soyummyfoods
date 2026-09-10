@@ -21,6 +21,8 @@ import { AdminDeliveryZonesPage } from './pages/admin/DeliveryZones';
 import { AdminDeliveryZoneEditorPage } from './pages/admin/DeliveryZoneEditor';
 import { AdminInventoryListPage } from './pages/admin/InventoryList';
 import { AdminInventoryDetailPage } from './pages/admin/InventoryDetail';
+import { AdminOrdersPage } from './pages/admin/Orders';
+import { AdminOrderDetailPage } from './pages/admin/OrderDetail';
 
 export function App() {
   return (
@@ -43,6 +45,8 @@ export function App() {
                 <Route path="delivery-zones/:zoneId/edit" element={<AdminDeliveryZoneEditorPage />} />
                 <Route path="inventory" element={<AdminInventoryListPage />} />
                 <Route path="inventory/:productId" element={<AdminInventoryDetailPage />} />
+                <Route path="orders" element={<AdminOrdersPage />} />
+                <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
               </Route>
             </Route>
             <Route path="/" element={<HomePage />} />

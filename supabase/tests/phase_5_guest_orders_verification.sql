@@ -6,6 +6,27 @@
 
 begin;
 
+-- Test-only fixture setup. This additional BEFORE INSERT trigger exists only for
+-- this transaction and only for the fixed expiry-test idempotency key. It creates
+-- an already-expired initial snapshot without mutating any order afterward or
+-- weakening the deployed immutable-snapshot trigger.
+create function public.phase_5_test_set_expired_reservation()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.idempotency_key = '50000000-0000-4000-8000-000000000001'::uuid then
+    new.reservation_expires_at = now() - interval '1 second';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger phase_5_test_set_expired_reservation_before_insert
+before insert on public.orders
+for each row execute function public.phase_5_test_set_expired_reservation();
+
 -- Schema, grant, and browser-boundary assertions.
 do $$
 begin
@@ -70,10 +91,21 @@ reset role;
 
 -- Executable trusted-operation coverage. The runner must be able to SET ROLE to
 -- service_role (as the Supabase SQL editor/disposable database owner can).
-create temporary table phase_5_ids (key text primary key, value uuid not null) on commit drop;
+create temporary table phase_5_ids (
+  key text primary key,
+  value uuid not null
+) on commit drop;
+
+grant select, insert, update, delete
+on table phase_5_ids
+to authenticated;
+
+grant select, insert, update, delete
+on table phase_5_ids
+to service_role;
 
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'OWNER_AUTH_USER_UUID', true);
+select set_config('request.jwt.claim.sub', '12727211-8255-41d8-af95-cf41e784d72b', true);
 do $$
 declare category_id uuid; product_id uuid; inventory_id uuid; zone_id uuid;
 begin
@@ -103,6 +135,7 @@ begin
   test_order_id := created.order_id;
   insert into phase_5_ids values ('order', test_order_id);
   if created.subtotal <> 16 or created.delivery_fee <> 2.25 or created.tax_amount <> 0 or created.total <> 18.25 or created.status <> 'pending_payment' then raise exception 'Authoritative sale/base, tax-disabled, or total calculation failed'; end if;
+  if created.reservation_expires_at >= now() then raise exception 'Expiry fixture was not created expired'; end if;
   if (select i.quantity_reserved from public.inventory i where i.id = test_inventory_id) <> 2 then raise exception 'Duplicate-line normalization/reservation failed'; end if;
   if not exists (select 1 from public.inventory_movements im where im.order_id = test_order_id and im.movement_type = 'order_reservation' and im.quantity_delta = 0 and im.reserved_delta = 2 and im.reserved_before = 0 and im.reserved_after = 2) then raise exception 'Reservation movement snapshot failed'; end if;
   if not exists (select 1 from public.order_status_history h where h.order_id = test_order_id and h.previous_status is null and h.new_status = 'pending_payment' and h.actor_user_id is null) then raise exception 'Initial status history failed'; end if;
@@ -117,7 +150,7 @@ $$;
 -- Tax is intentionally not calculated in Phase 5. Enabling it must fail safely.
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'OWNER_AUTH_USER_UUID', true);
+select set_config('request.jwt.claim.sub', '12727211-8255-41d8-af95-cf41e784d72b', true);
 update public.business_settings set tax_enabled = true, tax_label = 'Test tax', tax_rate_percent = 20 where id = 1;
 reset role;
 set local role service_role;
@@ -129,13 +162,13 @@ end;
 $$;
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'OWNER_AUTH_USER_UUID', true);
+select set_config('request.jwt.claim.sub', '12727211-8255-41d8-af95-cf41e784d72b', true);
 update public.business_settings set tax_enabled = false, tax_label = null, tax_rate_percent = null, tax_registration_number = null where id = 1;
 
 -- The owner cannot disable tracking while the reservation exists, but can after expiry.
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'OWNER_AUTH_USER_UUID', true);
+select set_config('request.jwt.claim.sub', '12727211-8255-41d8-af95-cf41e784d72b', true);
 do $$
 declare test_inventory_id uuid := (select value from phase_5_ids where key = 'inventory'); test_product_id uuid := (select value from phase_5_ids where key = 'product');
 begin
@@ -159,7 +192,6 @@ begin
     values(test_inventory_id, test_product_id, 'stock_added', 1, 10, 11, 1, 0, 1);
     raise exception 'Ordinary stock movement accepted reservation delta';
   exception when check_violation then null; end;
-  update public.orders o set reservation_expires_at = now() - interval '1 second' where o.id = test_order_id;
   perform public.expire_pending_order(test_order_id);
   if (select o.status from public.orders o where o.id = test_order_id) <> 'cancelled' or (select i.quantity_reserved from public.inventory i where i.id = test_inventory_id) <> 0 then raise exception 'Expiry did not cancel and release reservation'; end if;
   if not exists (select 1 from public.inventory_movements im where im.order_id = test_order_id and im.movement_type = 'order_release' and im.quantity_delta = 0 and im.reserved_delta = -2) then raise exception 'Release movement is incorrect'; end if;
@@ -172,7 +204,7 @@ $$;
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'OWNER_AUTH_USER_UUID', true);
+select set_config('request.jwt.claim.sub', '12727211-8255-41d8-af95-cf41e784d72b', true);
 do $$
 declare test_product_id uuid := (select value from phase_5_ids where key = 'product');
 begin

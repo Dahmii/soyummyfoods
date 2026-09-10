@@ -6,6 +6,28 @@ const isText = (value: unknown, minimum: number, maximum: number) => typeof valu
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const readDefaultSecretKey = (): string | null => {
+  const rawSecretKeys = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (!rawSecretKeys) {
+    console.error('guest-checkout configuration error: SUPABASE_SECRET_KEYS is missing.');
+    return null;
+  }
+
+  try {
+    const parsedSecretKeys: unknown = JSON.parse(rawSecretKeys);
+    const defaultSecretKey = isRecord(parsedSecretKeys) ? parsedSecretKeys.default : undefined;
+    if (typeof defaultSecretKey !== 'string' || defaultSecretKey.trim().length === 0) {
+      console.error('guest-checkout configuration error: SUPABASE_SECRET_KEYS.default is missing or invalid.');
+      return null;
+    }
+
+    return defaultSecretKey.trim();
+  } catch {
+    console.error('guest-checkout configuration error: SUPABASE_SECRET_KEYS is not valid JSON.');
+    return null;
+  }
+};
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers });
   if (request.method !== 'POST') return fail('method_not_allowed', 'Method not allowed.', 405);
@@ -26,9 +48,9 @@ Deno.serve(async (request) => {
   // WAF rule in front of this public stock-reserving endpoint before production.
   // This stateless function intentionally has no pretend in-memory limiter.
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!supabaseUrl || !serviceRoleKey) return fail('service_unavailable', 'Checkout is temporarily unavailable.', 503);
-  const client = createClient(supabaseUrl, serviceRoleKey);
+  const secretKey = readDefaultSecretKey();
+  if (!supabaseUrl || !secretKey) return fail('service_unavailable', 'Checkout is temporarily unavailable.', 503);
+  const client = createClient(supabaseUrl, secretKey);
   const payload = { idempotency_key: body.idempotencyKey, lines: (body.lines as unknown[]).map((line) => ({ product_id: (line as Record<string, unknown>).productId, quantity: (line as Record<string, unknown>).quantity })), customer_name: body.customerName, customer_email: body.email, customer_phone: body.phone, delivery_address: body.deliveryAddress, postcode: body.postcode, customer_note: body.customerNote };
   const { data, error } = await client.rpc('create_guest_order', { p_payload: payload });
   if (error) { const codes: Record<string, string> = { unsupported_delivery_area: 'We do not currently deliver to that postcode.', minimum_order_not_met: 'This delivery zone has a minimum order value.', insufficient_stock: 'One or more items are no longer available in that quantity.', product_unavailable: 'One or more items are no longer available.', tax_configuration_required: 'Checkout is temporarily unavailable.', expired_idempotency_key: 'Your previous checkout attempt expired. Please try again.' }; const code = Object.prototype.hasOwnProperty.call(codes, error.message) ? error.message : 'checkout_failed'; return fail(code, codes[code] ?? 'Checkout could not be completed.'); }
