@@ -12,3 +12,10 @@ export const checkoutRequestSchema = z.object({
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
 export interface CheckoutResponse { orderId: string; orderNumber: string; subtotal: number; deliveryFee: number; discountAmount: number; taxAmount: number; total: number; currency: string; status: 'pending_payment'; reservationExpiresAt: string; }
 export interface StripePaymentIntentResponse { clientSecret: string; }
+export interface GuestOrderPaymentStatus {
+  orderId: string;
+  orderNumber: string;
+  orderStatus: 'pending_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  paymentStatus: 'awaiting_payment_intent' | 'payment_intent_attached' | 'payment_failed' | 'succeeded' | 'late_success_requires_reconciliation';
+  terminal: boolean;
+}

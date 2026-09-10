@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase';
-import type { CheckoutRequest, CheckoutResponse, StripePaymentIntentResponse } from '../types/order';
+import type { CheckoutRequest, CheckoutResponse, GuestOrderPaymentStatus, StripePaymentIntentResponse } from '../types/order';
 
 export class CheckoutError extends Error {
   constructor(public readonly code: string, message: string) {
@@ -35,4 +35,12 @@ export async function createStripePaymentIntent(orderId: string, paymentCapabili
   }
   if (!data?.ok || typeof data.clientSecret !== 'string') throw new Error(data?.message ?? 'Payment could not be started. Please try again.');
   return { clientSecret: data.clientSecret };
+}
+
+export async function getGuestOrderPaymentStatus(orderId: string, paymentCapability: string): Promise<GuestOrderPaymentStatus> {
+  const { data, error } = await getSupabaseClient().functions.invoke('guest-order-status', {
+    body: { orderId, paymentCapability }
+  });
+  if (error || !data?.ok || !data.status) throw new CheckoutError('order_status_unavailable', 'Order status is unavailable.');
+  return data.status as GuestOrderPaymentStatus;
 }
