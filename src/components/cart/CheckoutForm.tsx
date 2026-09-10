@@ -10,6 +10,7 @@ import { formatPrice } from '../../utils/currency';
 import type { CartLine } from '../../hooks/useCartStore';
 import { CheckoutError, createGuestOrder } from '../../repositories/checkoutRepository';
 import type { CheckoutResponse } from '../../types/order';
+import { clearPaymentCapability, getOrCreatePaymentCapability } from '../../lib/paymentCapability';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Please enter your full name'),
@@ -32,7 +33,7 @@ export type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 interface CheckoutFormProps {
   subtotal: number; lines: CartLine[];
-  onSuccess: (order: CheckoutResponse) => void;
+  onSuccess: (order: CheckoutResponse, checkoutAttemptId: string) => void;
   onBack: () => void;
 }
 
@@ -62,10 +63,12 @@ export function CheckoutForm({ subtotal, lines, onSuccess, onBack }: CheckoutFor
         if (!line.productId) throw new Error('Checkout is unavailable until the live menu has loaded.');
         return { productId: line.productId, quantity: line.quantity };
       });
-      const order = await createGuestOrder({ lines: checkoutLines, customerName: values.fullName, email: values.email, phone: values.phone, deliveryAddress: values.address, postcode: values.postcode, customerNote: values.notes?.trim() || null, idempotencyKey });
-      onSuccess(order);
+      const paymentCapability = getOrCreatePaymentCapability(idempotencyKey);
+      const order = await createGuestOrder({ lines: checkoutLines, customerName: values.fullName, email: values.email, phone: values.phone, deliveryAddress: values.address, postcode: values.postcode, customerNote: values.notes?.trim() || null, idempotencyKey, paymentCapability });
+      onSuccess(order, idempotencyKey);
     } catch (cause) {
       if (cause instanceof CheckoutError && cause.code === 'expired_idempotency_key') {
+        clearPaymentCapability(idempotencyKey);
         setIdempotencyKey(crypto.randomUUID());
       }
       setSubmitError(cause instanceof Error ? cause.message : 'We could not place your order. Please try again.');

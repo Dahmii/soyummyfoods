@@ -4,15 +4,13 @@ import {
   MinusIcon,
   PlusIcon,
   ShoppingBagIcon,
-  Trash2Icon,
-  CheckCircle2Icon,
-  MessageCircleIcon } from
+  Trash2Icon } from
 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '../ui/sheet';
 import { Button } from '../ui/button';
 import { CheckoutForm } from './CheckoutForm';
+import { StripePaymentStep } from './StripePaymentStep';
 import { formatPrice } from '../../utils/currency';
-import { buildPaymentHelpMessage, openWhatsApp } from '../../utils/whatsapp';
 import type { CheckoutResponse } from '../../types/order';
 import type { CartLine } from '../../hooks/useCartStore';
 import {
@@ -21,7 +19,7 @@ import {
   useCartStore } from
 '../../hooks/useCartStore';
 
-type Stage = 'basket' | 'checkout' | 'confirmed';
+type Stage = 'basket' | 'checkout' | 'payment';
 
 interface PlacedOrder {
   lines: CartLine[];
@@ -29,6 +27,8 @@ interface PlacedOrder {
   delivery: number;
   total: number;
   orderNumber?: string;
+  orderId?: string;
+  checkoutAttemptId?: string;
   reservationExpiresAt?: string;
 }
 
@@ -59,48 +59,25 @@ export function CartDrawer() {
       <SheetContent aria-describedby="cart-description">
         <header className="border-b border-ink/10 bg-white px-5 py-4 pr-14">
           <SheetTitle className="font-display text-xl font-bold text-ink">
-            {stage === 'confirmed' ? 'Order confirmed' : 'Your basket'}
+            {stage === 'payment' ? 'Secure payment' : 'Your basket'}
           </SheetTitle>
           <SheetDescription id="cart-description" className="mt-1 text-sm text-ink/60">
-            {stage === 'confirmed' ?
-            'Your order is awaiting payment.' :
+            {stage === 'payment' ?
+            'Complete payment securely to submit your order for confirmation.' :
             `${itemCount} ${itemCount === 1 ? 'item' : 'items'} · delivered across the UK`}
           </SheetDescription>
         </header>
 
-        {stage === 'confirmed' ?
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-            <CheckCircle2Icon className="h-14 w-14 text-emerald-600" />
-            <h3 className="font-display text-2xl font-bold text-ink">Thank you!</h3>
-            <p className="text-sm leading-relaxed text-ink/60">
-              Order {placedOrder?.orderNumber ?? ''} has been received. It is awaiting payment and will not be prepared until payment is confirmed.
-            </p>
-            {placedOrder ?
-            <p className="font-display text-lg font-bold text-ink">Total: {formatPrice(placedOrder.total)}</p> :
-            null}
-            {placedOrder ?
-          <Button
-            size="lg"
-            className="mt-2 w-full bg-[#25D366] hover:bg-[#1EBE57]"
-            onClick={() =>
-            openWhatsApp(buildPaymentHelpMessage(placedOrder.orderNumber ?? ''))
-            }>
-            
-                <MessageCircleIcon className="h-4 w-4" /> Ask for payment details
-              </Button> :
-          null}
-            <Button onClick={closeCart} variant="ghost" size="sm">
-              Continue browsing
-            </Button>
-          </div> :
+        {stage === 'payment' && placedOrder?.orderId && placedOrder.checkoutAttemptId ?
+        <StripePaymentStep orderId={placedOrder.orderId} orderNumber={placedOrder.orderNumber ?? ''} checkoutAttemptId={placedOrder.checkoutAttemptId} /> :
         stage === 'checkout' ?
         <CheckoutForm
           subtotal={subtotal} lines={lines}
           onBack={() => setStage('basket')}
-          onSuccess={(order: CheckoutResponse) => {
-            setPlacedOrder({ lines, subtotal: order.subtotal, delivery: order.deliveryFee, total: order.total, orderNumber: order.orderNumber, reservationExpiresAt: order.reservationExpiresAt });
+          onSuccess={(order: CheckoutResponse, checkoutAttemptId: string) => {
+            setPlacedOrder({ lines, subtotal: order.subtotal, delivery: order.deliveryFee, total: order.total, orderId: order.orderId, orderNumber: order.orderNumber, reservationExpiresAt: order.reservationExpiresAt, checkoutAttemptId });
             clear();
-            setStage('confirmed');
+            setStage('payment');
           }} /> :
 
         lines.length === 0 ?
