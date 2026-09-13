@@ -23,6 +23,7 @@ import { AdminInventoryListPage } from './pages/admin/InventoryList';
 import { AdminInventoryDetailPage } from './pages/admin/InventoryDetail';
 import { AdminOrdersPage } from './pages/admin/Orders';
 import { AdminOrderDetailPage } from './pages/admin/OrderDetail';
+import { AdminPaymentReconciliationPage } from './pages/admin/PaymentReconciliation';
 
 export function App() {
   return (
@@ -47,6 +48,7 @@ export function App() {
                 <Route path="inventory/:productId" element={<AdminInventoryDetailPage />} />
                 <Route path="orders" element={<AdminOrdersPage />} />
                 <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
+                <Route path="payments/reconciliation" element={<AdminPaymentReconciliationPage />} />
               </Route>
             </Route>
             <Route path="/" element={<HomePage />} />
