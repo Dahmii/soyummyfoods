@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { enforceGuestRateLimit } from '../_shared/guestRateLimit.ts';
 
-const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
-const fail = (code: string, message: string, status = 400) => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
+const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Expose-Headers': 'Retry-After' };
+const fail = (code: string, message: string, status = 400, extraHeaders: Record<string, string> = {}) => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, ...extraHeaders, 'Content-Type': 'application/json' } });
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const paymentCapabilityPattern = /^[A-Za-z0-9_-]{43}$/;
 
@@ -115,6 +116,16 @@ Deno.serve(async (request) => {
   const supabaseSecretKey = readDefaultSecretKey();
   const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')?.trim();
   if (!supabaseUrl || !supabaseSecretKey || !stripeSecretKey || !stripeSecretKey.startsWith('sk_test_')) return fail('payment_unavailable', 'Online payment is temporarily unavailable.', 503);
+
+  const rateLimit = await enforceGuestRateLimit(
+    request,
+    'create-stripe-payment-intent',
+    `payment-intent:order-capability:${orderId}:${body.paymentCapability}`,
+    supabaseUrl,
+    supabaseSecretKey
+  );
+  if (rateLimit.kind === 'unavailable') return fail('payment_unavailable', 'Online payment is temporarily unavailable.', 503);
+  if (rateLimit.kind === 'limited') return fail('rate_limited', 'Too many requests. Please try again shortly.', 429, { 'Retry-After': String(rateLimit.retryAfterSeconds) });
 
   const client = createClient(supabaseUrl, supabaseSecretKey);
   const capabilityHash = await sha256Hex(paymentCapability);

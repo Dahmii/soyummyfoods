@@ -55,6 +55,7 @@ function PaymentForm({ clientSecret, onSubmitted }: { clientSecret: string; onSu
 
   return <div className="space-y-4">
     <ExpressCheckoutElement
+      options={{ paymentMethods: { applePay: 'always', googlePay: 'always' } }}
       onConfirm={(event) => void confirmPayment(() => event.paymentFailed({ reason: 'fail' }))}
       onLoadError={() => undefined}
     />

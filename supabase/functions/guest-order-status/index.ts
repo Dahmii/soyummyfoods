@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { enforceGuestRateLimit } from '../_shared/guestRateLimit.ts';
 
-const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
-const fail = (status = 400) => new Response(JSON.stringify({ ok: false, code: 'order_status_unavailable', message: 'Order status is unavailable.' }), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
+const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Expose-Headers': 'Retry-After' };
+const fail = (status = 400, extraHeaders: Record<string, string> = {}, code = 'order_status_unavailable', message = 'Order status is unavailable.') => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, ...extraHeaders, 'Content-Type': 'application/json' } });
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const paymentCapabilityPattern = /^[A-Za-z0-9_-]{43}$/;
 const orderStatuses = new Set(['pending_payment', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled']);
@@ -75,6 +76,15 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const secretKey = readDefaultSecretKey();
   if (!supabaseUrl || !secretKey) return fail(503);
+  const rateLimit = await enforceGuestRateLimit(
+    request,
+    'guest-order-status',
+    `order-status:order-capability:${body.orderId}:${body.paymentCapability}`,
+    supabaseUrl,
+    secretKey
+  );
+  if (rateLimit.kind === 'unavailable') return fail(503);
+  if (rateLimit.kind === 'limited') return fail(429, { 'Retry-After': String(rateLimit.retryAfterSeconds) }, 'rate_limited', 'Too many requests. Please try again shortly.');
   const client = createClient(supabaseUrl, secretKey);
   const paymentCapabilityHash = await sha256Hex(paymentCapability);
   const { data, error } = await client.rpc('get_guest_order_payment_status', {

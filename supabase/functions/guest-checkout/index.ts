@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { enforceGuestRateLimit } from '../_shared/guestRateLimit.ts';
 
-const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' };
-const fail = (code: string, message: string, status = 400) => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
+const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Expose-Headers': 'Retry-After' };
+const fail = (code: string, message: string, status = 400, extraHeaders: Record<string, string> = {}) => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, ...extraHeaders, 'Content-Type': 'application/json' } });
 const isText = (value: unknown, minimum: number, maximum: number) => typeof value === 'string' && value.trim().length >= minimum && value.trim().length <= maximum;
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -65,12 +66,18 @@ Deno.serve(async (request) => {
       const value = line as Record<string, unknown>;
       return uuidPattern.test(String(value.productId)) && Number.isInteger(value.quantity) && Number(value.quantity) >= 1 && Number(value.quantity) <= 99;
     })) return fail('invalid_request', 'Invalid checkout request.');
-  // PUBLIC PRODUCTION BLOCKER: configure durable distributed rate limiting or a
-  // WAF rule in front of this public stock-reserving endpoint before production.
-  // This stateless function intentionally has no pretend in-memory limiter.
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const secretKey = readDefaultSecretKey();
   if (!supabaseUrl || !secretKey) return fail('service_unavailable', 'Checkout is temporarily unavailable.', 503);
+  const rateLimit = await enforceGuestRateLimit(
+    request,
+    'guest-checkout',
+    `checkout:idempotency:${body.idempotencyKey}`,
+    supabaseUrl,
+    secretKey
+  );
+  if (rateLimit.kind === 'unavailable') return fail('service_unavailable', 'Checkout is temporarily unavailable.', 503);
+  if (rateLimit.kind === 'limited') return fail('rate_limited', 'Too many requests. Please try again shortly.', 429, { 'Retry-After': String(rateLimit.retryAfterSeconds) });
   const client = createClient(supabaseUrl, secretKey);
   const paymentCapabilityHash = await sha256Hex(paymentCapability);
   const payload = { idempotency_key: body.idempotencyKey, payment_capability_hash: paymentCapabilityHash, lines: (body.lines as unknown[]).map((line) => ({ product_id: (line as Record<string, unknown>).productId, quantity: (line as Record<string, unknown>).quantity })), customer_name: body.customerName, customer_email: body.email, customer_phone: body.phone, delivery_address: body.deliveryAddress, postcode: body.postcode, customer_note: body.customerNote };
