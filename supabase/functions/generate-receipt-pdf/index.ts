@@ -169,7 +169,9 @@ Deno.serve(async (request) => {
   if (!token) return fail('unauthorized', 'Authentication is required.', 401);
   let body: unknown;
   try { body = await request.json(); } catch { return fail('invalid_request', 'A financial document ID is required.', 400); }
-  if (!isRecord(body) || Object.keys(body).length !== 1 || typeof body.documentId !== 'string' || !uuidPattern.test(body.documentId)) return fail('invalid_request', 'A valid financial document ID is required.', 400);
+  if (!isRecord(body) || Object.keys(body).length !== 1
+    || (typeof body.documentId !== 'string' && typeof body.orderId !== 'string')
+    || !uuidPattern.test(String(body.documentId ?? body.orderId))) return fail('invalid_request', 'A valid receipt or order ID is required.', 400);
 
   const admin = createClient(url, key);
   const { data: userData, error: userError } = await admin.auth.getUser(token);
@@ -178,10 +180,18 @@ Deno.serve(async (request) => {
   const { data: roleRows, error: roleError } = await admin.from('user_roles').select('role').eq('user_id', user.id);
   if (roleError || !Array.isArray(roleRows) || !roleRows.some((row) => row.role === 'owner' || row.role === 'manager')) return fail('forbidden', 'Owner or manager access is required.', 403);
 
+  let documentId = typeof body.documentId === 'string' ? body.documentId : null;
+  if (!documentId) {
+    const { data: issued, error: issueError } = await admin.rpc('issue_paid_order_receipt', { p_order_id: body.orderId });
+    const issuedReceipt = Array.isArray(issued) ? issued[0] : issued;
+    if (issueError || !isRecord(issuedReceipt) || typeof issuedReceipt.id !== 'string') return fail('receipt_unavailable', 'Receipt is unavailable for this order.', 409);
+    documentId = issuedReceipt.id;
+  }
+
   const { data: documentRow, error: documentError } = await admin
     .from('financial_documents')
     .select('id, document_type, document_number, issued_at, issuer_snapshot, customer_snapshot, financial_snapshot')
-    .eq('id', body.documentId).maybeSingle();
+    .eq('id', documentId).maybeSingle();
   if (documentError) { console.error('generate-receipt-pdf document lookup failed'); return fail('receipt_lookup_failed', 'Could not load the receipt.', 503); }
   if (!documentRow) return fail('receipt_not_found', 'Receipt document was not found.', 404);
   if (documentRow.document_type !== 'receipt' || !isRecord(documentRow.issuer_snapshot) || !isRecord(documentRow.customer_snapshot) || !isRecord(documentRow.financial_snapshot)) return fail('invalid_receipt', 'Receipt document data is invalid.', 422);

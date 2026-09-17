@@ -127,6 +127,15 @@ Deno.serve(async (request) => {
     });
     if (error) return respond(500);
     const outcome = Array.isArray(data) ? data[0]?.outcome : data?.outcome;
+    // Receipt issuance is deliberately post-commit. It must never roll back or
+    // make Stripe retry the authoritative payment/inventory transaction.
+    if (outcome === 'processed' || outcome === 'duplicate') {
+      const { error: receiptError } = await client.rpc('issue_paid_order_receipt', { p_order_id: paymentIntent.orderId });
+      if (receiptError) {
+        console.error(`stripe-webhook receipt issuance failed: ${receiptError.code ?? 'unknown'}`);
+        await client.rpc('record_receipt_issuance_failure', { p_order_id: paymentIntent.orderId, p_error_code: receiptError.code ?? 'unknown' });
+      }
+    }
     return ['processed', 'duplicate', 'late_success_requires_reconciliation', 'rejected'].includes(outcome) ? respond(200) : respond(500);
   }
 

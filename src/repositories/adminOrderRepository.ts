@@ -105,9 +105,9 @@ export async function getAdminOrderReceiptArtifactStatus(orderId: string): Promi
   return row as AdminOrderReceiptArtifactStatus;
 }
 
-export async function generateAdminReceiptPdf(documentId: string): Promise<AdminReceiptDownload> {
-  const id = adminOrderCursorSchema.shape.id.parse(documentId);
-  const { data, error } = await getSupabaseClient().functions.invoke('generate-receipt-pdf', { body: { documentId: id } });
+export async function generateAdminReceiptPdf(receiptOrOrderId: string, recoveryOrder = false): Promise<AdminReceiptDownload> {
+  const id = adminOrderCursorSchema.shape.id.parse(receiptOrOrderId);
+  const { data, error } = await getSupabaseClient().functions.invoke('generate-receipt-pdf', { body: recoveryOrder ? { orderId: id } : { documentId: id } });
   if (error) {
     const context = (error as { context?: unknown }).context;
     if (context instanceof Response) {
