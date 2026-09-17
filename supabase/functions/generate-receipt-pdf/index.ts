@@ -7,7 +7,8 @@ const MAX_REQUEST_BYTES = 2048;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
 type Json = Record<string, unknown>;
@@ -156,8 +157,9 @@ function renderReceiptPdf(document: ReceiptDocument): Uint8Array {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers });
-  if (request.method !== 'POST') return fail('method_not_allowed', 'Method not allowed.', 405);
+  try {
+    if (request.method === 'OPTIONS') return new Response('ok', { headers });
+    if (request.method !== 'POST') return fail('method_not_allowed', 'Method not allowed.', 405);
   if (Number(request.headers.get('content-length') ?? 0) > MAX_REQUEST_BYTES) return fail('request_too_large', 'Request is too large.', 413);
   const authorization = request.headers.get('authorization');
   const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
@@ -244,5 +246,9 @@ Deno.serve(async (request) => {
   if (registrationError || !isRecord(artifact)) { console.error('generate-receipt-pdf artifact registration failed'); return fail('artifact_registration_failed', 'The PDF file exists but artifact registration failed; retry to recover it.', 409); }
   const { data: signed, error: signedError } = await admin.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
   if (signedError || !signed?.signedUrl) return fail('signed_url_failed', 'Receipt was generated but its download URL could not be prepared.', 503);
-  return new Response(JSON.stringify({ ok: true, artifact, signedUrl: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS, generated: true }), { headers: { ...headers, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ ok: true, artifact, signedUrl: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS, generated: true }), { headers: { ...headers, 'Content-Type': 'application/json' } });
+  } catch {
+    console.error('generate-receipt-pdf unexpected failure');
+    return fail('internal_error', 'Receipt generation is unavailable.', 500);
+  }
 });
