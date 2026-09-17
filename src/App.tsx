@@ -9,6 +9,7 @@ import { MenuPage } from './pages/Menu';
 import { MediaPage } from './pages/Media';
 import { BlogPage } from './pages/Blog';
 import { AllergyPage } from './pages/Allergy';
+import { OrderConfirmationPage } from './pages/OrderConfirmation';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
@@ -56,6 +57,7 @@ export function App() {
             <Route path="/media" element={<MediaPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/allergy" element={<AllergyPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>

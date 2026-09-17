@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   MinusIcon,
   PlusIcon,
@@ -12,7 +12,8 @@ import { CheckoutForm } from './CheckoutForm';
 import { StripePaymentStep } from './StripePaymentStep';
 import { formatPrice } from '../../utils/currency';
 import type { CheckoutResponse } from '../../types/order';
-import type { CartLine } from '../../hooks/useCartStore';
+import { loadActiveCheckoutHandoff, saveCheckoutHandoff, type CheckoutHandoff } from '../../lib/checkoutHandoff';
+import { getPaymentCapability } from '../../lib/paymentCapability';
 import {
   selectItemCount,
   selectSubtotal,
@@ -22,14 +23,33 @@ import {
 type Stage = 'basket' | 'checkout' | 'payment';
 
 interface PlacedOrder {
-  lines: CartLine[];
-  subtotal: number;
-  delivery: number;
-  total: number;
-  orderNumber?: string;
-  orderId?: string;
-  checkoutAttemptId?: string;
-  reservationExpiresAt?: string;
+  order: CheckoutResponse;
+  checkoutAttemptId: string;
+}
+
+function hasUsableActiveHandoff(): CheckoutHandoff | null {
+  const handoff = loadActiveCheckoutHandoff();
+  if (!handoff) return null;
+  try {
+    return getPaymentCapability(handoff.checkoutAttemptId) ? handoff : null;
+  } catch {
+    return null;
+  }
+}
+
+function checkoutResponseFromHandoff(handoff: CheckoutHandoff): CheckoutResponse {
+  return {
+    orderId: handoff.orderId,
+    orderNumber: handoff.orderNumber,
+    subtotal: handoff.subtotal,
+    deliveryFee: handoff.deliveryFee,
+    discountAmount: handoff.discountAmount,
+    taxAmount: handoff.taxAmount,
+    total: handoff.total,
+    currency: handoff.currency,
+    status: 'pending_payment',
+    reservationExpiresAt: handoff.reservationExpiresAt
+  };
 }
 
 export function CartDrawer() {
@@ -40,9 +60,11 @@ export function CartDrawer() {
   const decrement = useCartStore((state) => state.decrement);
   const removeLine = useCartStore((state) => state.removeLine);
   const clear = useCartStore((state) => state.clear);
+  const navigate = useNavigate();
 
   const [stage, setStage] = useState<Stage>('basket');
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
+  const [activeHandoff, setActiveHandoff] = useState<CheckoutHandoff | null>(() => hasUsableActiveHandoff());
   const itemCount = selectItemCount({ lines });
   const subtotal = selectSubtotal({ lines });
 
@@ -53,6 +75,21 @@ export function CartDrawer() {
     }
     return undefined;
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) setActiveHandoff(hasUsableActiveHandoff());
+  }, [isOpen]);
+
+  const continueExistingPayment = () => {
+    if (!activeHandoff) return;
+    setPlacedOrder({ order: checkoutResponseFromHandoff(activeHandoff), checkoutAttemptId: activeHandoff.checkoutAttemptId });
+    setStage('payment');
+  };
+
+  const checkExistingPayment = () => {
+    closeCart();
+    navigate('/order-confirmation');
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => open ? undefined : closeCart()}>
@@ -68,15 +105,16 @@ export function CartDrawer() {
           </SheetDescription>
         </header>
 
-        {stage === 'payment' && placedOrder?.orderId && placedOrder.checkoutAttemptId ?
-        <StripePaymentStep orderId={placedOrder.orderId} orderNumber={placedOrder.orderNumber ?? ''} checkoutAttemptId={placedOrder.checkoutAttemptId} /> :
+        {stage === 'payment' && placedOrder ?
+        <StripePaymentStep order={placedOrder.order} checkoutAttemptId={placedOrder.checkoutAttemptId} /> :
         stage === 'checkout' ?
         <CheckoutForm
           subtotal={subtotal} lines={lines}
           onBack={() => setStage('basket')}
           onSuccess={(order: CheckoutResponse, checkoutAttemptId: string) => {
-            setPlacedOrder({ lines, subtotal: order.subtotal, delivery: order.deliveryFee, total: order.total, orderId: order.orderId, orderNumber: order.orderNumber, reservationExpiresAt: order.reservationExpiresAt, checkoutAttemptId });
-            clear();
+            saveCheckoutHandoff(order, checkoutAttemptId);
+            setActiveHandoff(hasUsableActiveHandoff());
+            setPlacedOrder({ order, checkoutAttemptId });
             setStage('payment');
           }} /> :
 
@@ -169,12 +207,19 @@ export function CartDrawer() {
                 <span>{formatPrice(subtotal)}</span>
               </div>
               <p className="text-xs leading-relaxed text-ink/50">Delivery fee and final total are calculated securely after you provide your delivery address.</p>
-              <Button size="lg" className="w-full" onClick={() => setStage('checkout')}>
-                Checkout
-              </Button>
-              <Button variant="ghost" size="sm" className="w-full" onClick={clear}>
-                Clear basket
-              </Button>
+              {activeHandoff ? <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                <p className="font-semibold">You have an order awaiting payment.</p>
+                <p className="text-amber-800">Continue the existing checkout or check its authoritative status before starting another order.</p>
+                <Button size="lg" className="w-full" onClick={continueExistingPayment}>Continue payment</Button>
+                <Button variant="outline" size="sm" className="w-full" onClick={checkExistingPayment}>Check payment status</Button>
+              </div> : <>
+                <Button size="lg" className="w-full" onClick={() => setStage('checkout')}>
+                  Checkout
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full" onClick={clear}>
+                  Clear basket
+                </Button>
+              </>}
             </div>
           </>
         }

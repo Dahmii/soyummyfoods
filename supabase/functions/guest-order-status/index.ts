@@ -5,10 +5,17 @@ const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Head
 const fail = (status = 400, extraHeaders: Record<string, string> = {}, code = 'order_status_unavailable', message = 'Order status is unavailable.') => new Response(JSON.stringify({ ok: false, code, message }), { status, headers: { ...headers, ...extraHeaders, 'Content-Type': 'application/json' } });
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const paymentCapabilityPattern = /^[A-Za-z0-9_-]{43}$/;
+const currencyPattern = /^[A-Z]{3}$/;
 const orderStatuses = new Set(['pending_payment', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled']);
 const paymentStatuses = new Set(['awaiting_payment_intent', 'payment_intent_attached', 'payment_failed', 'succeeded', 'late_success_requires_reconciliation']);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+const isAmount = (value: unknown): value is number | string => {
+  if (typeof value === 'string' && value.trim() === '') return false;
+  return (typeof value === 'number' || typeof value === 'string')
+    && Number.isFinite(Number(value))
+    && Number(value) >= 0;
+};
 
 const decodePaymentCapability = (value: unknown): Uint8Array | null => {
   if (typeof value !== 'string' || !paymentCapabilityPattern.test(value)) return null;
@@ -52,13 +59,28 @@ const toStatus = (value: unknown, requestedOrderId: string) => {
     || typeof value.order_number !== 'string'
     || typeof value.order_status !== 'string' || !orderStatuses.has(value.order_status)
     || typeof value.payment_status !== 'string' || !paymentStatuses.has(value.payment_status)
-    || typeof value.terminal !== 'boolean') return null;
+    || typeof value.terminal !== 'boolean'
+    || !isAmount(value.subtotal)
+    || !isAmount(value.delivery_fee)
+    || !isAmount(value.discount_amount)
+    || !isAmount(value.tax_amount)
+    || !isAmount(value.total)
+    || typeof value.currency_code !== 'string' || !currencyPattern.test(value.currency_code)
+    || typeof value.reservation_expires_at !== 'string'
+    || !Number.isFinite(Date.parse(value.reservation_expires_at))) return null;
   return {
     orderId: value.order_id,
     orderNumber: value.order_number,
     orderStatus: value.order_status,
     paymentStatus: value.payment_status,
-    terminal: value.terminal
+    terminal: value.terminal,
+    subtotal: Number(value.subtotal),
+    deliveryFee: Number(value.delivery_fee),
+    discountAmount: Number(value.discount_amount),
+    taxAmount: Number(value.tax_amount),
+    total: Number(value.total),
+    currency: value.currency_code,
+    reservationExpiresAt: value.reservation_expires_at
   };
 };
 

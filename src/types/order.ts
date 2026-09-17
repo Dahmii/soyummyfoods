@@ -18,4 +18,11 @@ export interface GuestOrderPaymentStatus {
   orderStatus: 'pending_payment' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   paymentStatus: 'awaiting_payment_intent' | 'payment_intent_attached' | 'payment_failed' | 'succeeded' | 'late_success_requires_reconciliation';
   terminal: boolean;
+  subtotal: number;
+  deliveryFee: number;
+  discountAmount: number;
+  taxAmount: number;
+  total: number;
+  currency: string;
+  reservationExpiresAt: string;
 }
