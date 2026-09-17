@@ -9,6 +9,8 @@ import {
   type AdminOrderItem,
   type AdminOrderListItem,
   type AdminOrderPage,
+  type AdminOrderReceiptArtifactStatus,
+  type AdminReceiptDownload,
   type AdminOrderStatusHistory,
   type AdminOrderTransitionInput
 } from '../types/adminOrders';
@@ -92,6 +94,35 @@ export async function listAdminOrderStatusHistory(orderId: string): Promise<Admi
   const { data, error } = await getSupabaseClient().rpc('get_admin_order_status_history', { p_order_id: id });
   fail(error);
   return (data ?? []) as AdminOrderStatusHistory[];
+}
+
+export async function getAdminOrderReceiptArtifactStatus(orderId: string): Promise<AdminOrderReceiptArtifactStatus | null> {
+  const id = adminOrderCursorSchema.shape.id.parse(orderId);
+  const { data, error } = await getSupabaseClient().rpc('get_admin_order_receipt_artifact_status', { p_order_id: id });
+  fail(error);
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  return row as AdminOrderReceiptArtifactStatus;
+}
+
+export async function generateAdminReceiptPdf(documentId: string): Promise<AdminReceiptDownload> {
+  const id = adminOrderCursorSchema.shape.id.parse(documentId);
+  const { data, error } = await getSupabaseClient().functions.invoke('generate-receipt-pdf', { body: { documentId: id } });
+  if (error) {
+    const context = (error as { context?: unknown }).context;
+    if (context instanceof Response) {
+      const payload: unknown = await context.json().catch(() => null);
+      if (payload && typeof payload === 'object' && 'message' in payload && typeof payload.message === 'string') {
+        throw new Error(payload.message);
+      }
+    }
+    throw new Error(error.message || 'Could not generate the receipt PDF.');
+  }
+  if (!data || data.ok !== true || typeof data.signedUrl !== 'string') {
+    const message = data && typeof data.message === 'string' ? data.message : 'Could not generate the receipt PDF.';
+    throw new Error(message);
+  }
+  return { signedUrl: data.signedUrl, generated: data.generated === true };
 }
 
 export async function transitionAdminOrderStatus(input: AdminOrderTransitionInput): Promise<AdminOrderDetail> {

@@ -78,6 +78,18 @@ export interface AdminOrderStatusHistory {
   created_at: string;
 }
 
+export interface AdminOrderReceiptArtifactStatus {
+  financial_document_id: string;
+  document_number: string;
+  artifact_id: string | null;
+  generated_at: string | null;
+}
+
+export interface AdminReceiptDownload {
+  signedUrl: string;
+  generated: boolean;
+}
+
 export interface AdminOrderPage {
   orders: AdminOrderListItem[];
   nextCursor: AdminOrderCursor | null;
