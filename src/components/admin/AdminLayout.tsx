@@ -113,7 +113,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-[#f7f5f1] text-ink">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-ink/10 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-ink/10 bg-white lg:flex">
         <SidebarContent navigation={visibleNavigation} onNavigate={() => setIsMenuOpen(false)} />
       </aside>
 
@@ -126,15 +126,15 @@ export function AdminLayout() {
         </div>
       ) : null}
 
-      <div className="min-h-screen lg:pl-72">
+      <div className="min-h-screen lg:pl-64">
         <header className="sticky top-0 z-30 border-b border-ink/10 bg-white/95 backdrop-blur">
-          <div className="flex min-h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-h-14 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-ink transition-colors hover:bg-ink/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 lg:hidden" aria-label="Open navigation menu" aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen(true)}>
                 <MenuIcon className="h-5 w-5" aria-hidden="true" />
               </button>
               <div className="min-w-0">
-                <h1 className="truncate font-display text-xl font-bold text-ink sm:text-2xl">{pageMeta.title}</h1>
+                <h1 className="truncate font-display text-lg font-bold text-ink sm:text-xl">{pageMeta.title}</h1>
                 <p className="hidden truncate text-sm text-ink/55 sm:block">{pageMeta.description}</p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function AdminLayout() {
             </div>
           </div>
         </header>
-        <main data-admin-content className="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main data-admin-content className="mx-auto w-full max-w-[96rem] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
           <Outlet />
         </main>
       </div>
@@ -178,7 +178,6 @@ function SidebarContent({ navigation, onNavigate, onClose }: { navigation: Navig
           </div>
         ))}
       </nav>
-      <p className="border-t border-ink/10 px-5 py-4 text-xs text-ink/45">Operational workspace</p>
     </>
   );
 }

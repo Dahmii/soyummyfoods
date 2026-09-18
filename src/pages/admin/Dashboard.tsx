@@ -16,13 +16,12 @@ export function AdminDashboardPage() {
 
   return (
     <section className="max-w-5xl">
-      <div className="rounded-2xl border border-ink/10 bg-white p-5 shadow-sm sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Dashboard</p>
-        <h2 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">Overview of your SoYummy operations.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/60">Use the workspace navigation to manage orders, stock, your menu, and business operations.</p>
+      <div>
+        <h2 className="font-display text-xl font-bold text-ink">Quick access</h2>
+        <p className="mt-1 text-sm text-ink/60">Common areas for managing your store.</p>
       </div>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {links.map(({ to, title, description, icon: Icon }) => <Link key={to} to={to} className="group rounded-2xl border border-ink/10 bg-white p-5 shadow-sm transition-colors hover:border-brand-200 hover:bg-brand-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"><div className="flex items-start justify-between gap-4"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><Icon className="h-5 w-5" aria-hidden="true" /></span><ArrowUpRightIcon className="h-5 w-5 text-ink/35 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-600" aria-hidden="true" /></div><h3 className="mt-5 text-base font-semibold text-ink">{title}</h3><p className="mt-1 text-sm leading-relaxed text-ink/60">{description}</p></Link>)}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {links.map(({ to, title, description, icon: Icon }) => <Link key={to} to={to} className="group rounded-xl border border-ink/10 bg-white p-4 shadow-sm transition-colors hover:border-brand-200 hover:bg-brand-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"><div className="flex items-start justify-between gap-4"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700"><Icon className="h-4 w-4" aria-hidden="true" /></span><ArrowUpRightIcon className="h-4 w-4 text-ink/35 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-600" aria-hidden="true" /></div><h3 className="mt-4 text-sm font-semibold text-ink">{title}</h3><p className="mt-1 text-sm leading-relaxed text-ink/60">{description}</p></Link>)}
       </div>
     </section>
   );
