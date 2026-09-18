@@ -3,6 +3,15 @@ import { z } from 'zod';
 export const ADMIN_ORDER_STATUSES = ['pending_payment', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'] as const;
 export type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 
+export const ADMIN_OPERATIONAL_PAYMENT_STATUSES = [
+  'awaiting_payment_intent',
+  'payment_intent_attached',
+  'payment_failed',
+  'succeeded',
+  'late_success_requires_reconciliation'
+] as const;
+export type AdminOperationalPaymentStatus = (typeof ADMIN_OPERATIONAL_PAYMENT_STATUSES)[number];
+
 export const ADMIN_ACTIONABLE_ORDER_STATUSES = ['confirmed', 'preparing', 'ready'] as const;
 export type AdminActionableOrderStatus = (typeof ADMIN_ACTIONABLE_ORDER_STATUSES)[number];
 
@@ -65,6 +74,16 @@ export interface AdminOrderDetail extends AdminOrderListItem {
   tax_amount: number | string;
   customer_note: string | null;
   updated_at: string;
+}
+
+export interface AdminOrderPaymentSummary {
+  order_id: string;
+  payment_status: AdminOperationalPaymentStatus;
+  amount_minor: number | string;
+  currency_code: string;
+  provider: 'stripe';
+  paid_at: string | null;
+  requires_manager_review: boolean;
 }
 
 export interface AdminOrderItem {

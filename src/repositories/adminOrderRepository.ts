@@ -11,6 +11,7 @@ import {
   type AdminOrderItem,
   type AdminOrderListItem,
   type AdminOrderPage,
+  type AdminOrderPaymentSummary,
   type AdminOrderReceiptArtifactStatus,
   type AdminReceiptDownload,
   type AdminOrderStatusHistory,
@@ -100,6 +101,15 @@ export async function getAdminOrder(orderId: string): Promise<AdminOrderDetail |
     .maybeSingle();
   fail(error);
   return data as AdminOrderDetail | null;
+}
+
+export async function getAdminOrderPaymentSummary(orderId: string): Promise<AdminOrderPaymentSummary | null> {
+  const id = adminOrderCursorSchema.shape.id.parse(orderId);
+  const { data, error } = await getSupabaseClient().rpc('get_admin_order_payment_summary', {
+    p_order_id: id
+  }).maybeSingle();
+  fail(error);
+  return data as AdminOrderPaymentSummary | null;
 }
 
 export async function listAdminOrderItems(orderId: string): Promise<AdminOrderItem[]> {
