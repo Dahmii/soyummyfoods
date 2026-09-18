@@ -26,6 +26,7 @@ export interface AdminInventory {
   product_id: string;
   is_tracking_enabled: boolean;
   quantity_on_hand: number;
+  quantity_reserved: number;
   low_stock_threshold: number | null;
   created_at: string;
   updated_at: string;
