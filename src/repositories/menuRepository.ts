@@ -17,6 +17,11 @@ interface ProductImageRow {
   display_order: number;
 }
 
+interface ProductSellabilityRow {
+  product_id: string;
+  is_orderable: boolean;
+}
+
 interface ProductRow {
   id: string;
   slug: string;
@@ -39,14 +44,32 @@ export async function fetchMenuFromSupabase(
 ): Promise<MenuCatalog> {
   const supabase = getSupabaseClient();
   const requestSignal = signal ?? new AbortController().signal;
-  const { data: categories, error: categoriesError } = await supabase
-    .from('categories')
-    .select('slug, name, display_order')
-    .eq('is_active', true)
-    .order('display_order')
-    .abortSignal(requestSignal);
+  const [categoriesResponse, productsResponse, sellabilityResponse] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('slug, name, display_order')
+      .eq('is_active', true)
+      .order('display_order')
+      .abortSignal(requestSignal),
+    supabase
+      .from('products')
+      .select(
+        'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, is_primary, display_order)'
+      )
+      .eq('status', 'active')
+      .order('display_order')
+      .abortSignal(requestSignal),
+    supabase
+      .rpc('get_public_product_sellability')
+      .abortSignal(requestSignal)
+  ]);
+
+  const { data: categories, error: categoriesError } = categoriesResponse;
+  const { data, error } = productsResponse;
+  const { data: sellability, error: sellabilityError } = sellabilityResponse;
 
   if (categoriesError) throw new Error('The menu could not be loaded right now.');
+  if (error || sellabilityError) throw new Error('The menu could not be loaded right now.');
   const categoryData = menuCategoryOptionSchema.array().safeParse(
     ((categories ?? []) as unknown as CategoryRow[]).map((category) => ({
       slug: category.slug,
@@ -57,16 +80,9 @@ export async function fetchMenuFromSupabase(
   if (!categoryData.success) throw new Error('The menu could not be loaded right now.');
   const activeCategorySlugs = new Set(categoryData.data.map((category) => category.slug));
 
-  const { data, error } = await supabase
-    .from('products')
-    .select(
-      'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, is_primary, display_order)'
-    )
-    .eq('status', 'active')
-    .order('display_order')
-    .abortSignal(requestSignal);
-
-  if (error) throw new Error('The menu could not be loaded right now.');
+  const sellabilityByProductId = new Map(
+    ((sellability ?? []) as unknown as ProductSellabilityRow[]).map((item) => [item.product_id, item.is_orderable])
+  );
 
   const mapped = ((data ?? []) as unknown as ProductRow[])
     .filter((product) => activeCategorySlugs.has(product.category.slug))
@@ -88,7 +104,11 @@ export async function fetchMenuFromSupabase(
         image: primaryImage.storage_path,
         category: product.category.slug,
         prepTimeMinutes: product.prep_time_minutes,
-        available: product.is_available,
+        // Price-on-request items retain their existing enquiry-only path. Every
+        // normal cart item fails closed when its sellability row is missing.
+        available: product.price_on_request
+          ? product.is_available
+          : sellabilityByProductId.get(product.id) ?? false,
         tags: product.tags,
         // Ratings remain frontend presentation metadata; they are not database data.
         rating: ratingsBySlug[product.slug],

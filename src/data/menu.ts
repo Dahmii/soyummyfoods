@@ -603,7 +603,9 @@ export function fetchMenu(signal?: AbortSignal): Promise<MenuCatalog> {
         reject(new Error('The menu could not be loaded right now.'));
         return;
       }
-      resolve({ items: parsed.data, categories: LEGACY_MENU_CATEGORIES });
+      // Static entries have no authoritative product IDs or inventory state.
+      // They remain browseable for local development but cannot enter checkout.
+      resolve({ items: parsed.data.map((item) => ({ ...item, available: false })), categories: LEGACY_MENU_CATEGORIES });
     }, 650);
 
     signal?.addEventListener('abort', () => {
