@@ -3,6 +3,9 @@ import { z } from 'zod';
 export const ADMIN_ORDER_STATUSES = ['pending_payment', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'] as const;
 export type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 
+export const ADMIN_ACTIONABLE_ORDER_STATUSES = ['confirmed', 'preparing', 'ready'] as const;
+export type AdminActionableOrderStatus = (typeof ADMIN_ACTIONABLE_ORDER_STATUSES)[number];
+
 export const adminOrderFiltersSchema = z.object({
   status: z.enum(ADMIN_ORDER_STATUSES).nullable(),
   createdDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
@@ -40,6 +43,15 @@ export interface AdminOrderListItem {
   total: number | string;
   currency_code: string;
   reservation_expires_at: string;
+  created_at: string;
+}
+
+export interface AdminActionableOrder {
+  id: string;
+  order_number: string;
+  status: AdminActionableOrderStatus;
+  total: number | string;
+  currency_code: string;
   created_at: string;
 }
 

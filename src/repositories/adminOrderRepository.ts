@@ -1,9 +1,11 @@
 import { getSupabaseClient } from '../lib/supabase';
 import {
+  ADMIN_ACTIONABLE_ORDER_STATUSES,
   adminOrderCursorSchema,
   adminOrderFiltersSchema,
   adminOrderTransitionSchema,
   type AdminOrderCursor,
+  type AdminActionableOrder,
   type AdminOrderDetail,
   type AdminOrderFilters,
   type AdminOrderItem,
@@ -16,6 +18,7 @@ import {
 } from '../types/adminOrders';
 
 const PAGE_SIZE = 25;
+const OPERATIONAL_QUEUE_LIMIT = 8;
 
 function fail(error: { message: string } | null): void {
   if (error) throw new Error(error.message);
@@ -65,6 +68,27 @@ export async function listAdminOrders(filters: AdminOrderFilters, cursor: AdminO
     orders,
     nextCursor: hasMore && last ? { createdAt: last.created_at, id: last.id } : null
   };
+}
+
+export async function listAdminActionableOrders(): Promise<AdminActionableOrder[]> {
+  const { data, error } = await getSupabaseClient()
+    .from('orders')
+    .select('id, order_number, status, total, currency_code, created_at')
+    .in('status', ADMIN_ACTIONABLE_ORDER_STATUSES)
+    .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(OPERATIONAL_QUEUE_LIMIT);
+  fail(error);
+  return (data ?? []) as AdminActionableOrder[];
+}
+
+export async function countAdminConfirmedOrders(): Promise<number> {
+  const { count, error } = await getSupabaseClient()
+    .from('orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'confirmed');
+  fail(error);
+  return count ?? 0;
 }
 
 export async function getAdminOrder(orderId: string): Promise<AdminOrderDetail | null> {

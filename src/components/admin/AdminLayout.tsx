@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAdminAuth } from '../../features/admin/AdminAuthContext';
+import { useAdminOperationalAwareness } from '../../hooks/useAdminOperationalAwareness';
 import { cn } from '../../utils/cn';
 
 type NavigationItem = {
@@ -89,6 +90,7 @@ export function AdminLayout() {
   const { pathname } = useLocation();
   const { roles, session, signOut } = useAdminAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const operationalAwareness = useAdminOperationalAwareness();
   const canReconcilePayments = roles.some((role) => role === 'owner' || role === 'manager');
   const pageMeta = useMemo(() => getPageMeta(pathname), [pathname]);
   const visibleNavigation = useMemo(
@@ -114,14 +116,14 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-[#f7f5f1] text-ink">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-ink/10 bg-white lg:flex">
-        <SidebarContent navigation={visibleNavigation} onNavigate={() => setIsMenuOpen(false)} />
+        <SidebarContent navigation={visibleNavigation} confirmedOrderCount={operationalAwareness.confirmedOrderCount} onNavigate={() => setIsMenuOpen(false)} />
       </aside>
 
       {isMenuOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button type="button" aria-label="Close navigation menu" className="absolute inset-0 bg-ink/35" onClick={() => setIsMenuOpen(false)} />
           <aside aria-label="Admin navigation" className="relative flex h-full w-[min(18rem,calc(100vw-3.5rem))] flex-col bg-white shadow-2xl">
-            <SidebarContent navigation={visibleNavigation} onNavigate={() => setIsMenuOpen(false)} onClose={() => setIsMenuOpen(false)} />
+            <SidebarContent navigation={visibleNavigation} confirmedOrderCount={operationalAwareness.confirmedOrderCount} onNavigate={() => setIsMenuOpen(false)} onClose={() => setIsMenuOpen(false)} />
           </aside>
         </div>
       ) : null}
@@ -148,14 +150,14 @@ export function AdminLayout() {
           </div>
         </header>
         <main data-admin-content className="mx-auto w-full max-w-[96rem] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
-          <Outlet />
+          <Outlet context={operationalAwareness} />
         </main>
       </div>
     </div>
   );
 }
 
-function SidebarContent({ navigation, onNavigate, onClose }: { navigation: NavigationGroup[]; onNavigate: () => void; onClose?: () => void }) {
+function SidebarContent({ navigation, confirmedOrderCount, onNavigate, onClose }: { navigation: NavigationGroup[]; confirmedOrderCount: number; onNavigate: () => void; onClose?: () => void }) {
   return (
     <>
       <div className="flex h-20 shrink-0 items-center justify-between border-b border-ink/10 px-5">
@@ -172,7 +174,8 @@ function SidebarContent({ navigation, onNavigate, onClose }: { navigation: Navig
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                return <li key={item.to}><NavLink to={item.to} end={item.exact} onClick={onNavigate} className={({ isActive }) => cn('flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500', isActive ? 'bg-brand-50 text-brand-700' : 'text-ink/70 hover:bg-ink/5 hover:text-ink')}><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /><span>{item.label}</span>{item.exact ? null : <ChevronRightIcon className="ml-auto h-4 w-4 opacity-40" aria-hidden="true" />}</NavLink></li>;
+                const showConfirmedOrderCount = item.to === '/admin/orders' && confirmedOrderCount > 0;
+                return <li key={item.to}><NavLink to={item.to} end={item.exact} onClick={onNavigate} className={({ isActive }) => cn('flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500', isActive ? 'bg-brand-50 text-brand-700' : 'text-ink/70 hover:bg-ink/5 hover:text-ink')}><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /><span>{item.label}</span>{showConfirmedOrderCount ? <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-brand-600 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white" aria-label={`${confirmedOrderCount} confirmed orders awaiting fulfilment`}>{confirmedOrderCount}</span> : null}{item.exact ? null : <ChevronRightIcon className={cn('h-4 w-4 opacity-40', showConfirmedOrderCount ? '' : 'ml-auto')} aria-hidden="true" />}</NavLink></li>;
               })}
             </ul>
           </div>
