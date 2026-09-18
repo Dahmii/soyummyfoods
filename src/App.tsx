@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { FloatingCart } from './components/cart/FloatingCart';
@@ -29,10 +28,19 @@ import { AdminPaymentReconciliationPage } from './pages/admin/PaymentReconciliat
 export function App() {
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen w-full flex-col bg-cream">
-        <Header />
-        <main className="flex-1">
-          <Routes>
+      <AppContent />
+    </BrowserRouter>);
+}
+
+function AppContent() {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
+
+  return (
+    <div className={isAdminRoute ? 'min-h-screen bg-[#f7f5f1]' : 'flex min-h-screen w-full flex-col bg-cream'}>
+      {isAdminRoute ? null : <Header />}
+      <main className={isAdminRoute ? 'min-h-screen' : 'flex-1'}>
+        <Routes>
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin" element={<RequireAdmin />}>
               <Route element={<AdminLayout />}>
@@ -59,12 +67,11 @@ export function App() {
             <Route path="/allergy" element={<AllergyPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="*" element={<HomePage />} />
-          </Routes>
-        </main>
-        <Footer />
-        <FloatingCart />
-        <CartDrawer />
-      </div>
-    </BrowserRouter>);
-
+        </Routes>
+      </main>
+      {isAdminRoute ? null : <Footer />}
+      {isAdminRoute ? null : <FloatingCart />}
+      {isAdminRoute ? null : <CartDrawer />}
+    </div>
+  );
 }
