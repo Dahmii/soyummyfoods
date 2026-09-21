@@ -13,6 +13,7 @@ import { NotFoundPage } from './pages/NotFound';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicy';
 import { TermsAndConditionsPage } from './pages/TermsAndConditions';
 import { RefundPolicyPage } from './pages/RefundPolicy';
+import { LegalNoticePage } from './pages/LegalNotice';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/legal-notice" element={<LegalNoticePage />} />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
