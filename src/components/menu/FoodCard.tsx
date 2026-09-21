@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ClockIcon, PlusIcon, StarIcon, CheckIcon, ImageIcon, MessageCircleIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
@@ -14,13 +14,54 @@ interface FoodCardProps {
   className?: string;
 }
 
+interface ProductImageDebugContext {
+  productName: string;
+  productId: string;
+  image: string;
+  isStorageBackedImage: boolean;
+}
+
+function logStorageImageDebug(
+  event: 'source' | 'reset' | 'load' | 'error',
+  context: ProductImageDebugContext,
+  image?: HTMLImageElement
+) {
+  if (!context.isStorageBackedImage) return;
+  console.debug(`[ProductImage debug] ${event}`, {
+    productName: context.productName,
+    productId: context.productId,
+    image: context.image,
+    currentSrc: image?.currentSrc,
+    complete: image?.complete,
+    naturalWidth: image?.naturalWidth,
+    naturalHeight: image?.naturalHeight,
+    timestamp: new Date().toISOString(),
+    performanceNow: performance.now()
+  });
+}
+
 export function FoodCard({ item, className }: FoodCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [justAdded, setJustAdded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  // TEMP Phase 10G image diagnostics — remove after investigation.
+  const imageDebugRef = useRef<ProductImageDebugContext>({
+    productName: item.name,
+    productId: item.databaseId,
+    image: item.image,
+    isStorageBackedImage: item.image.includes('/storage/v1/object/public/product-images/')
+  });
+  imageDebugRef.current = {
+    productName: item.name,
+    productId: item.databaseId,
+    image: item.image,
+    isStorageBackedImage: item.image.includes('/storage/v1/object/public/product-images/')
+  };
 
   useEffect(() => {
+    logStorageImageDebug('source', imageDebugRef.current);
+    logStorageImageDebug('reset', imageDebugRef.current);
     setImageLoaded(false);
     setImageFailed(false);
   }, [item.image]);
@@ -58,11 +99,13 @@ export function FoodCard({ item, className }: FoodCardProps) {
           src={item.image}
           alt={item.imageAlt ?? item.name}
           loading="lazy"
-          onLoad={() => {
+          onLoad={(event) => {
+            logStorageImageDebug('load', imageDebugRef.current, event.currentTarget);
             setImageLoaded(true);
             setImageFailed(false);
           }}
-          onError={() => {
+          onError={(event) => {
+            logStorageImageDebug('error', imageDebugRef.current, event.currentTarget);
             setImageLoaded(false);
             setImageFailed(true);
           }}
