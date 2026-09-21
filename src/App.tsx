@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { FloatingCart } from './components/cart/FloatingCart';
@@ -9,6 +9,7 @@ import { MediaPage } from './pages/Media';
 import { BlogPage } from './pages/Blog';
 import { AllergyPage } from './pages/Allergy';
 import { OrderConfirmationPage } from './pages/OrderConfirmation';
+import { NotFoundPage } from './pages/NotFound';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
@@ -58,6 +59,7 @@ function AppContent() {
                 <Route path="orders" element={<AdminOrdersPage />} />
                 <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
                 <Route path="payments/reconciliation" element={<AdminPaymentReconciliationPage />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
             </Route>
             <Route path="/" element={<HomePage />} />
@@ -66,7 +68,7 @@ function AppContent() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/allergy" element={<AllergyPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-            <Route path="*" element={<HomePage />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       {isAdminRoute ? null : <Footer />}
