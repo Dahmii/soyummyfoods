@@ -12,6 +12,7 @@ import { OrderConfirmationPage } from './pages/OrderConfirmation';
 import { NotFoundPage } from './pages/NotFound';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicy';
 import { TermsAndConditionsPage } from './pages/TermsAndConditions';
+import { RefundPolicyPage } from './pages/RefundPolicy';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
@@ -72,6 +73,7 @@ function AppContent() {
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

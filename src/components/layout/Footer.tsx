@@ -119,6 +119,11 @@ export function Footer() {
                     Terms &amp; Conditions
                   </Link>
                 </li>
+                <li>
+                  <Link to="/refund-policy" className="text-xs font-medium text-white/60 transition-colors hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
+                    Refund Policy
+                  </Link>
+                </li>
               </ul>
             </nav>
             <ul className="flex items-center gap-2">
