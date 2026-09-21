@@ -114,6 +114,11 @@ export function Footer() {
                     Privacy Policy
                   </Link>
                 </li>
+                <li>
+                  <Link to="/terms-and-conditions" className="text-xs font-medium text-white/60 transition-colors hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
+                    Terms &amp; Conditions
+                  </Link>
+                </li>
               </ul>
             </nav>
             <ul className="flex items-center gap-2">

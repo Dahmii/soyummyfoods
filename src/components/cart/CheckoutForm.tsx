@@ -147,7 +147,11 @@ export function CheckoutForm({ subtotal, lines, onSuccess, onBack }: CheckoutFor
         </div>
         <p className="text-xs leading-relaxed text-ink/50">Your delivery fee and final total will be calculated securely when you place the order.</p>
         <p className="text-xs leading-relaxed text-ink/50">
-          We use your information to process and fulfil your order. See our{' '}
+          By placing your order, you agree to our{' '}
+          <Link to="/terms-and-conditions" className="font-semibold text-brand-600 underline-offset-2 hover:underline">
+            Terms &amp; Conditions
+          </Link>
+          . We use your information to process and fulfil your order — see our{' '}
           <Link to="/privacy-policy" className="font-semibold text-brand-600 underline-offset-2 hover:underline">
             Privacy Policy
           </Link>{' '}
