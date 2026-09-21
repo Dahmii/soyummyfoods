@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
+import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, MessageCircleIcon } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { getGuestOrderPaymentStatus } from '../repositories/checkoutRepository';
 import { clearActiveCheckoutHandoff, loadCheckoutHandoff, markCheckoutHandoffConfirmed, type CheckoutHandoff } from '../lib/checkoutHandoff';
@@ -8,6 +8,8 @@ import { clearPaymentCapability, getPaymentCapability } from '../lib/paymentCapa
 import type { GuestOrderPaymentStatus } from '../types/order';
 import { formatPrice } from '../utils/currency';
 import { useCartStore } from '../hooks/useCartStore';
+import { clearWhatsAppOrderHandoff, loadWhatsAppOrderHandoff } from '../lib/whatsappOrderHandoff';
+import { buildConfirmedOrderMessage, openWhatsApp } from '../utils/whatsapp';
 
 const pollIntervalMs = 1_500;
 const pollTimeoutMs = 25_000;
@@ -49,6 +51,7 @@ function FinancialSummary({ status }: { status: GuestOrderPaymentStatus }) {
 
 export function OrderConfirmationPage() {
   const [handoff] = useState<CheckoutHandoff | null>(() => loadCheckoutHandoff());
+  const [whatsAppHandoff] = useState(() => handoff ? loadWhatsAppOrderHandoff(handoff) : null);
   const [state, setState] = useState<ConfirmationState>(() => handoff ? 'loading' : 'no_handoff');
   const [authoritativeStatus, setAuthoritativeStatus] = useState<GuestOrderPaymentStatus | null>(null);
   const [checkNumber, setCheckNumber] = useState(0);
@@ -64,6 +67,23 @@ export function OrderConfirmationPage() {
   const returnToCart = () => {
     navigate('/menu');
     openCart();
+  };
+  const continueBrowsing = () => {
+    if (handoff) clearWhatsAppOrderHandoff(handoff);
+    navigate('/menu');
+  };
+  const sendOrderToWhatsApp = () => {
+    if (!authoritativeStatus) return;
+    openWhatsApp(buildConfirmedOrderMessage({
+      orderNumber: authoritativeStatus.orderNumber,
+      items: whatsAppHandoff?.items,
+      subtotal: authoritativeStatus.subtotal,
+      deliveryFee: authoritativeStatus.deliveryFee,
+      discountAmount: authoritativeStatus.discountAmount,
+      taxAmount: authoritativeStatus.taxAmount,
+      total: authoritativeStatus.total,
+      currency: authoritativeStatus.currency
+    }));
   };
 
   useEffect(() => {
@@ -82,6 +102,7 @@ export function OrderConfirmationPage() {
         capability = null;
       }
       if (!capability) {
+        clearWhatsAppOrderHandoff(handoff);
         if (active) setState('unavailable');
         return;
       }
@@ -104,6 +125,7 @@ export function OrderConfirmationPage() {
         if (isCancelled(status)) {
           clearActiveCheckoutHandoff(handoff);
           clearPaymentCapability(handoff.checkoutAttemptId);
+          clearWhatsAppOrderHandoff(handoff);
           setState('cancelled');
           return;
         }
@@ -151,8 +173,8 @@ export function OrderConfirmationPage() {
       <CheckCircle2Icon className="mx-auto h-12 w-12 text-emerald-600" />
       <h1 className="mt-4 font-display text-3xl font-bold text-ink">Payment confirmed</h1>
       <p className="mt-3 text-sm text-ink/65">Your payment has been verified and order <span className="font-semibold text-ink">{authoritativeStatus?.orderNumber ?? handoff.orderNumber}</span> is confirmed and sent for preparation.</p>
-      {authoritativeStatus ? <><FinancialSummary status={authoritativeStatus} /><p className="mt-4 text-sm text-ink/65">Current order status: <span className="font-medium capitalize text-ink">{authoritativeStatus.orderStatus.replace(/_/g, ' ')}</span></p></> : null}
-      <Button asChild className="mt-6"><Link to="/menu">Continue browsing</Link></Button>
+      {authoritativeStatus ? <><FinancialSummary status={authoritativeStatus} /><p className="mt-4 text-sm text-ink/65">Current order status: <span className="font-medium capitalize text-ink">{authoritativeStatus.orderStatus.replace(/_/g, ' ')}</span></p><div className="mx-auto mt-6 max-w-sm rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left"><h2 className="font-display text-xl font-bold text-ink">Send your order to us</h2><p className="mt-2 text-sm leading-relaxed text-ink/65">Send your order details to SoYummy on WhatsApp so our team can see it immediately.</p><Button type="button" className="mt-4 w-full bg-[#25D366] hover:bg-[#1fb85a]" onClick={sendOrderToWhatsApp}><MessageCircleIcon className="h-4 w-4" /> Send order to WhatsApp</Button></div></> : null}
+      <Button type="button" className="mt-4" onClick={continueBrowsing}>Continue browsing</Button>
     </> : null}
 
     {handoff && state === 'payment_failed' ? <>

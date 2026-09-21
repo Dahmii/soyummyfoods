@@ -11,6 +11,7 @@ import type { CartLine } from '../../hooks/useCartStore';
 import { CheckoutError, createGuestOrder } from '../../repositories/checkoutRepository';
 import type { CheckoutResponse } from '../../types/order';
 import { clearPaymentCapability, getOrCreatePaymentCapability } from '../../lib/paymentCapability';
+import { saveWhatsAppOrderHandoff } from '../../lib/whatsappOrderHandoff';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Please enter your full name'),
@@ -65,6 +66,7 @@ export function CheckoutForm({ subtotal, lines, onSuccess, onBack }: CheckoutFor
       });
       const paymentCapability = getOrCreatePaymentCapability(idempotencyKey);
       const order = await createGuestOrder({ lines: checkoutLines, customerName: values.fullName, email: values.email, phone: values.phone, deliveryAddress: values.address, postcode: values.postcode, customerNote: values.notes?.trim() || null, idempotencyKey, paymentCapability });
+      saveWhatsAppOrderHandoff(order, idempotencyKey, lines);
       onSuccess(order, idempotencyKey);
     } catch (cause) {
       if (cause instanceof CheckoutError && cause.code === 'expired_idempotency_key') {

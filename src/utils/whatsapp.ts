@@ -1,4 +1,4 @@
-import { formatPrice } from './currency';
+import { formatCurrency, formatPrice } from './currency';
 import type { CartLine } from '../hooks/useCartStore';
 
 /** Business WhatsApp number in international format, digits only. */
@@ -65,6 +65,48 @@ export function buildOrderMessage({
     'Please confirm availability, payment details and my delivery slot. Thank you!'
   );
 
+  return parts.join('\n');
+}
+
+interface ConfirmedOrderMessageInput {
+  orderNumber: string;
+  items?: Array<{ name: string; quantity: number }>;
+  subtotal: number;
+  deliveryFee: number;
+  discountAmount: number;
+  taxAmount: number;
+  total: number;
+  currency: string;
+}
+
+export function buildConfirmedOrderMessage({
+  orderNumber,
+  items,
+  subtotal,
+  deliveryFee,
+  discountAmount,
+  taxAmount,
+  total,
+  currency
+}: ConfirmedOrderMessageInput): string {
+  const parts = [
+    'Hi SoYummy 👋',
+    '',
+    "I've just placed and paid for an order.",
+    '',
+    `Order: ${orderNumber}`
+  ];
+  if (items?.length) {
+    parts.push('', 'Items:', ...items.map((item) => `${item.quantity} × ${item.name}`));
+  }
+  parts.push(
+    '',
+    `Subtotal: ${formatCurrency(subtotal, currency)}`,
+    `Delivery: ${formatCurrency(deliveryFee, currency)}`
+  );
+  if (discountAmount !== 0) parts.push(`Discount: −${formatCurrency(discountAmount, currency)}`);
+  if (taxAmount !== 0) parts.push(`Tax: ${formatCurrency(taxAmount, currency)}`);
+  parts.push(`Total: ${formatCurrency(total, currency)}`, '', "Please confirm you've received it.");
   return parts.join('\n');
 }
 
