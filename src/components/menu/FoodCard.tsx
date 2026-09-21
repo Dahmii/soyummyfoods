@@ -53,21 +53,29 @@ export function FoodCard({ item, className }: FoodCardProps) {
         {!imageLoaded && !imageFailed ?
         <div className="absolute inset-0 animate-pulse bg-ink/10" aria-hidden="true" /> :
         null}
-        {!imageFailed ? <img
+        <img
+          key={item.image}
           src={item.image}
           alt={item.imageAlt ?? item.name}
           loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageFailed(true)}
+          onLoad={() => {
+            setImageLoaded(true);
+            setImageFailed(false);
+          }}
+          onError={() => {
+            setImageLoaded(false);
+            setImageFailed(true);
+          }}
           className={cn(
             'h-full w-full object-cover transition-all duration-500 group-hover:scale-105',
-            imageLoaded ? 'opacity-100' : 'opacity-0',
+            imageLoaded && !imageFailed ? 'opacity-100' : 'opacity-0',
             !item.available && 'grayscale'
-          )} /> :
+          )} />
+        {imageFailed ?
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-cream-dark text-ink/45" role="img" aria-label={`${item.name} image unavailable`}>
           <ImageIcon className="h-8 w-8" aria-hidden="true" />
           <span className="text-xs font-medium">Image unavailable</span>
-        </div>}
+        </div> : null}
         
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
