@@ -10,6 +10,7 @@ import { BlogPage } from './pages/Blog';
 import { AllergyPage } from './pages/Allergy';
 import { OrderConfirmationPage } from './pages/OrderConfirmation';
 import { NotFoundPage } from './pages/NotFound';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicy';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/Login';
@@ -68,6 +69,7 @@ function AppContent() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/allergy" element={<AllergyPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

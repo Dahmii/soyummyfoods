@@ -146,6 +146,13 @@ export function CheckoutForm({ subtotal, lines, onSuccess, onBack }: CheckoutFor
           <span>{formatPrice(subtotal)}</span>
         </div>
         <p className="text-xs leading-relaxed text-ink/50">Your delivery fee and final total will be calculated securely when you place the order.</p>
+        <p className="text-xs leading-relaxed text-ink/50">
+          We use your information to process and fulfil your order. See our{' '}
+          <Link to="/privacy-policy" className="font-semibold text-brand-600 underline-offset-2 hover:underline">
+            Privacy Policy
+          </Link>{' '}
+          for details.
+        </p>
         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ?
           <>
