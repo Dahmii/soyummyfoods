@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const CATALOG_TAGS = ['popular', 'new', 'special'] as const;
 export const PRODUCT_STATUSES = ['draft', 'active', 'archived'] as const;
 
-const localImagePath = /^\/[A-Za-z0-9][A-Za-z0-9._/-]*\.(jpg|jpeg|png|webp)$/i;
+const legacyImagePath = /^\/[A-Za-z0-9][A-Za-z0-9._/-]*\.(jpg|jpeg|png|webp)$/i;
+const storageObjectPath = /^products\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
 const nullableMoney = z.number().nonnegative().nullable();
 
 export const categoryInputSchema = z.object({
@@ -40,11 +41,20 @@ export const productInputSchema = z.object({
   }
 });
 
-export const productImageInputSchema = z.object({
-  storage_path: z.string().regex(localImagePath, 'Use an approved root-relative local image path.'),
-  alt_text: z.string().trim().nullable(),
-  display_order: z.number().int().nonnegative()
-});
+export const productImageInputSchema = z.discriminatedUnion('storage_bucket', [
+  z.object({
+    storage_bucket: z.null(),
+    storage_path: z.string().regex(legacyImagePath, 'Use an approved root-relative local image path.'),
+    alt_text: z.string().trim().nullable(),
+    display_order: z.number().int().nonnegative()
+  }),
+  z.object({
+    storage_bucket: z.literal('product-images'),
+    storage_path: z.string().regex(storageObjectPath, 'Use an approved product-image Storage object path.'),
+    alt_text: z.string().trim().nullable(),
+    display_order: z.number().int().nonnegative()
+  })
+]);
 
 export type CategoryInput = z.infer<typeof categoryInputSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
@@ -52,4 +62,8 @@ export type ProductImageInput = z.infer<typeof productImageInputSchema>;
 
 export interface AdminCategory extends CategoryInput { id: string; created_at: string; }
 export interface AdminProduct extends ProductInput { id: string; created_at: string; category: { name: string; slug: string; } | null; }
-export interface AdminProductImage { id: string; product_id: string; storage_path: string; alt_text: string | null; is_primary: boolean; display_order: number; }
+export type AdminProductImage = ProductImageInput & {
+  id: string;
+  product_id: string;
+  is_primary: boolean;
+};

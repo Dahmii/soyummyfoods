@@ -11,6 +11,7 @@ export const menuItemSchema = z.object({
   description: z.string().min(1),
   price: z.number().nonnegative().nullable(),
   image: z.string().min(1),
+  imageAlt: z.string().min(1).optional(),
   category: menuCategorySchema,
   prepTimeMinutes: z.number().int().positive(),
   available: z.boolean(),

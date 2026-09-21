@@ -4,6 +4,7 @@ import {
   menuResponseSchema,
   type MenuCatalog } from
 '../types/menu';
+import { PRODUCT_IMAGE_BUCKET } from './adminCatalogRepository';
 
 interface CategoryRow {
   slug: string;
@@ -13,6 +14,8 @@ interface CategoryRow {
 
 interface ProductImageRow {
   storage_path: string;
+  storage_bucket: string | null;
+  alt_text: string | null;
   is_primary: boolean;
   display_order: number;
 }
@@ -54,7 +57,7 @@ export async function fetchMenuFromSupabase(
     supabase
       .from('products')
       .select(
-        'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, is_primary, display_order)'
+        'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, storage_bucket, alt_text, is_primary, display_order)'
       )
       .eq('status', 'active')
       .order('display_order')
@@ -101,7 +104,10 @@ export async function fetchMenuFromSupabase(
         name: product.name,
         description: product.description,
         price: product.base_price === null ? null : Number(product.base_price),
-        image: primaryImage.storage_path,
+        image: primaryImage.storage_bucket === null
+          ? primaryImage.storage_path
+          : supabase.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(primaryImage.storage_path).data.publicUrl,
+        imageAlt: primaryImage.alt_text?.trim() || product.name,
         category: product.category.slug,
         prepTimeMinutes: product.prep_time_minutes,
         // Price-on-request items retain their existing enquiry-only path. Every

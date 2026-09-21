@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ClockIcon, PlusIcon, StarIcon, CheckIcon, MessageCircleIcon } from 'lucide-react';
+import { ClockIcon, PlusIcon, StarIcon, CheckIcon, ImageIcon, MessageCircleIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { formatPrice } from '../../utils/currency';
@@ -18,6 +18,12 @@ export function FoodCard({ item, className }: FoodCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [justAdded, setJustAdded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+  }, [item.image]);
 
   useEffect(() => {
     if (!justAdded) return;
@@ -44,19 +50,24 @@ export function FoodCard({ item, className }: FoodCardProps) {
       )}>
       
       <div className="relative aspect-[4/3] overflow-hidden bg-cream-dark">
-        {!imageLoaded ?
+        {!imageLoaded && !imageFailed ?
         <div className="absolute inset-0 animate-pulse bg-ink/10" aria-hidden="true" /> :
         null}
-        <img
+        {!imageFailed ? <img
           src={item.image}
-          alt={item.name}
+          alt={item.imageAlt ?? item.name}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
+          onError={() => setImageFailed(true)}
           className={cn(
             'h-full w-full object-cover transition-all duration-500 group-hover:scale-105',
             imageLoaded ? 'opacity-100' : 'opacity-0',
             !item.available && 'grayscale'
-          )} />
+          )} /> :
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-cream-dark text-ink/45" role="img" aria-label={`${item.name} image unavailable`}>
+          <ImageIcon className="h-8 w-8" aria-hidden="true" />
+          <span className="text-xs font-medium">Image unavailable</span>
+        </div>}
         
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
