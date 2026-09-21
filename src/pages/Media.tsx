@@ -1,5 +1,4 @@
 import React from 'react';
-import { PlayIcon } from 'lucide-react';
 import { SectionHeading } from '../components/SectionHeading';
 import { GALLERY, VIDEOS, IMAGERY } from '../data/site';
 
@@ -62,13 +61,6 @@ export function MediaPage() {
                   loading="lazy"
                   className="aspect-video w-full object-cover" />
                 
-                  <button
-                  type="button"
-                  aria-label={`Play ${video.title}`}
-                  className="absolute left-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-brand-500 text-white shadow-lift transition-transform hover:scale-105">
-                  
-                    <PlayIcon className="h-5 w-5 fill-current" />
-                  </button>
                   <span className="absolute bottom-4 left-4 rounded-md bg-ink/80 px-2 py-1 text-xs font-semibold text-white">
                     {video.duration}
                   </span>

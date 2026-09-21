@@ -121,7 +121,7 @@ export function TermsAndConditionsPage() {
 
           <TermsSection id="refunds" title="13. Refunds and problems with an order">
             <p>If an order is not supplied, is incorrect, is damaged, or is not reasonably what you expected, please contact us promptly with your order details so that we can investigate and put matters right where appropriate.</p>
-            <p>Our <Link to="/refund-policy" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Refund Policy</Link> will provide further guidance when published. Nothing in it or these Terms removes rights that you have under consumer law.</p>
+            <p>Our <Link to="/refund-policy" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Refund Policy</Link> provides further guidance. Nothing in it or these Terms removes rights that you have under consumer law.</p>
           </TermsSection>
 
           <TermsSection id="consumer-rights" title="14. Your consumer rights">

@@ -1,13 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  InstagramIcon,
-  FacebookIcon,
-  TwitterIcon,
   MailIcon,
   PhoneIcon,
   MapPinIcon,
-  GlobeIcon,
   MessageCircleIcon } from
 'lucide-react';
 import { Logo } from './Logo';
@@ -19,14 +15,9 @@ const EXPLORE = [
 { to: '/menu', label: 'Bulk Orders' },
 { to: '/blog', label: 'Blog' },
 { to: '/allergy', label: 'Allergy Advisory' },
-{ to: '/media', label: 'Get in Touch' }];
+{ to: '/media', label: 'Media & Gallery' }];
 
-
-const SOCIALS = [
-{ Icon: InstagramIcon, label: 'Instagram' },
-{ Icon: FacebookIcon, label: 'Facebook' },
-{ Icon: TwitterIcon, label: 'Twitter' },
-{ Icon: GlobeIcon, label: 'Website' }];
+// CLIENT REVIEW: restore social links only after verified profile URLs are available.
 
 
 export function Footer() {
@@ -106,8 +97,7 @@ export function Footer() {
           <p className="text-xs text-white/40">
             © {new Date().getFullYear()} SoYummy Foods UK. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-5">
-            <nav aria-label="Legal">
+          <nav aria-label="Legal">
               <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                 <li>
                   <Link to="/privacy-policy" className="text-xs font-medium text-white/60 transition-colors hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink">
@@ -130,21 +120,7 @@ export function Footer() {
                   </Link>
                 </li>
               </ul>
-            </nav>
-            <ul className="flex items-center gap-2">
-              {SOCIALS.map(({ Icon, label }) =>
-              <li key={label}>
-                  <a
-                  href="#"
-                  aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-brand-500 hover:text-white">
-
-                    <Icon className="h-4 w-4" />
-                  </a>
-                </li>
-              )}
-            </ul>
-          </div>
+          </nav>
         </div>
       </div>
     </footer>);

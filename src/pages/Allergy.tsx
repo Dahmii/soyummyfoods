@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangleIcon, MessageCircleIcon, PhoneIcon } from 'lucide-react';
+import { AlertTriangleIcon, MessageCircleIcon } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import {
   buildAllergyEnquiryMessage,
-  openWhatsApp,
-  WHATSAPP_DISPLAY } from
+  openWhatsApp } from
 '../utils/whatsapp';
 
 const ALLERGENS = [
@@ -113,14 +112,8 @@ export function AllergyPage() {
               className="mt-5 w-full bg-[#25D366] hover:bg-[#1EBE57]"
               onClick={() => openWhatsApp(buildAllergyEnquiryMessage())}>
               
-              <MessageCircleIcon className="h-4 w-4" /> Message us on WhatsApp
+              <MessageCircleIcon className="h-4 w-4" /> WhatsApp us
             </Button>
-            <a
-              href="tel:+442079460192"
-              className="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-ink/70 transition-colors hover:text-brand-600">
-              
-              <PhoneIcon className="h-4 w-4 text-brand-500" /> {WHATSAPP_DISPLAY}
-            </a>
           </section>
 
           <section className="rounded-2xl border border-ink/10 bg-cream p-6">

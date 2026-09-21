@@ -1,26 +1,7 @@
-import React, { useState } from 'react';
-import { ArrowRightIcon, CheckCircle2Icon } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { BLOG_CATEGORIES, FEATURED_POST, POSTS, IMAGERY } from '../data/site';
 
 export function BlogPage() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-
-  function handleSubscribe(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-    if (!isValid) {
-      setEmailError('Enter a valid email address');
-      return;
-    }
-    setEmailError(null);
-    setSubscribed(true);
-  }
-
   return (
     <div className="w-full bg-white">
       <section className="border-b border-ink/10 bg-cream-dark">
@@ -64,9 +45,6 @@ export function BlogPage() {
                     <p className="text-xs text-ink/50">Food Historian &amp; Writer</p>
                   </div>
                 </div>
-                <Button size="sm">
-                  Read full article <ArrowRightIcon className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </article>
@@ -107,13 +85,11 @@ export function BlogPage() {
             <ul className="mt-4 space-y-1">
               {BLOG_CATEGORIES.map((category) =>
               <li key={category.label}>
-                  <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-ink/70 transition-colors hover:bg-brand-50 hover:text-brand-700">
+                  <div className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-ink/70">
                   
                     {category.label}
                     <span className="text-xs text-ink/40">{category.count}</span>
-                  </button>
+                  </div>
                 </li>
               )}
             </ul>
@@ -121,42 +97,12 @@ export function BlogPage() {
 
           <section className="rounded-2xl border border-brand-100 bg-brand-50 p-5">
             <h2 className="font-display text-lg font-bold text-ink">
-              Taste the Stories
+              Stay in the loop
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-ink/60">
-              Get our favourite Nigerian home-style recipes, food culture reviews and
-              menu updates delivered straight to your inbox.
+              Our newsletter is coming soon. Follow SoYummy for updates, new dishes and
+              stories from the kitchen.
             </p>
-            {subscribed ?
-            <p
-              role="status"
-              className="mt-4 flex items-center gap-2 rounded-xl bg-white px-3 py-3 text-sm font-medium text-emerald-700">
-              
-                <CheckCircle2Icon className="h-4 w-4" /> You're subscribed. Welcome!
-              </p> :
-
-            <form onSubmit={handleSubscribe} noValidate className="mt-4 space-y-3">
-                <label htmlFor="newsletter-email" className="sr-only">
-                  Email address
-                </label>
-                <Input
-                id="newsletter-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter your email"
-                aria-invalid={emailError ? true : undefined} />
-              
-                {emailError ?
-              <p role="alert" className="text-xs font-medium text-red-600">
-                    {emailError}
-                  </p> :
-              null}
-                <Button type="submit" className="w-full">
-                  Subscribe
-                </Button>
-              </form>
-            }
           </section>
 
           <section className="rounded-2xl border border-ink/10 bg-white p-5 shadow-card">
