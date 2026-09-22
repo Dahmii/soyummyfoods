@@ -6,12 +6,13 @@ import { AlertCircleIcon, Loader2Icon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { CheckoutError, createStripePaymentIntent } from '../../repositories/checkoutRepository';
 import { getPaymentCapability } from '../../lib/paymentCapability';
+import { readStripeBrowserConfiguration } from '../../lib/stripeMode';
 import { useCartStore } from '../../hooks/useCartStore';
 import type { CheckoutResponse } from '../../types/order';
 import { formatPrice } from '../../utils/currency';
 
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.trim();
-const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
+const stripeConfiguration = readStripeBrowserConfiguration();
+const stripePromise = stripeConfiguration ? loadStripe(stripeConfiguration.publishableKey) : null;
 
 interface StripePaymentStepProps {
   order: CheckoutResponse;
@@ -86,7 +87,7 @@ export function StripePaymentStep({ order, checkoutAttemptId }: StripePaymentSte
   const closeCart = useCartStore((state) => state.closeCart);
 
   useEffect(() => {
-    if (!stripePromise) {
+    if (!stripeConfiguration || !stripePromise) {
       setError('Online payment is temporarily unavailable.');
       return;
     }
@@ -103,7 +104,15 @@ export function StripePaymentStep({ order, checkoutAttemptId }: StripePaymentSte
     }
     let cancelled = false;
     void createStripePaymentIntent(order.orderId, capability)
-      .then((payment) => { if (!cancelled) setClientSecret(payment.clientSecret); })
+      .then((payment) => {
+        if (cancelled) return;
+        if (payment.stripeMode !== stripeConfiguration.mode) {
+          console.warn('Stripe payment mode mismatch between browser and payment service.');
+          setError('Online payment is temporarily unavailable.');
+          return;
+        }
+        setClientSecret(payment.clientSecret);
+      })
       .catch((cause) => {
         if (!cancelled) setError(cause instanceof CheckoutError ? cause.message : 'Payment could not be started. Please try again.');
       });

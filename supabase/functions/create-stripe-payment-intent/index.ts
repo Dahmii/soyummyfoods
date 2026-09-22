@@ -15,7 +15,14 @@ type PreparedPayment = {
   provider_payment_intent_id: string | null;
 };
 
+type StripeMode = 'test' | 'live';
+
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const readStripeMode = (value: string | undefined): StripeMode | null => value === 'test' || value === 'live' ? value : null;
+
+const isStripeSecretKeyForMode = (stripeMode: StripeMode, stripeSecretKey: string): boolean =>
+  stripeSecretKey.startsWith(stripeMode === 'test' ? 'sk_test_' : 'sk_live_');
 
 const decodePaymentCapability = (value: unknown): Uint8Array | null => {
   if (typeof value !== 'string' || !paymentCapabilityPattern.test(value)) return null;
@@ -114,8 +121,12 @@ Deno.serve(async (request) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseSecretKey = readDefaultSecretKey();
+  const stripeMode = readStripeMode(Deno.env.get('STRIPE_MODE'));
   const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')?.trim();
-  if (!supabaseUrl || !supabaseSecretKey || !stripeSecretKey || !stripeSecretKey.startsWith('sk_test_')) return fail('payment_unavailable', 'Online payment is temporarily unavailable.', 503);
+  if (!supabaseUrl || !supabaseSecretKey || !stripeMode || !stripeSecretKey || !isStripeSecretKeyForMode(stripeMode, stripeSecretKey)) {
+    console.error('create-stripe-payment-intent configuration error: STRIPE_MODE or STRIPE_SECRET_KEY is missing, invalid, or mismatched.');
+    return fail('payment_unavailable', 'Online payment is temporarily unavailable.', 503);
+  }
 
   const rateLimit = await enforceGuestRateLimit(
     request,
@@ -177,5 +188,5 @@ Deno.serve(async (request) => {
   }
 
   if (!clientSecret) return fail('payment_unavailable', 'Payment could not be started. Please try again.', 503);
-  return new Response(JSON.stringify({ ok: true, clientSecret }), { headers: { ...headers, 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify({ ok: true, clientSecret, stripeMode }), { headers: { ...headers, 'Content-Type': 'application/json' } });
 });

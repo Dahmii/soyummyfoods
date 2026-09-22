@@ -33,8 +33,12 @@ export async function createStripePaymentIntent(orderId: string, paymentCapabili
     }
     throw new Error('Payment could not be started. Please try again.');
   }
-  if (!data?.ok || typeof data.clientSecret !== 'string') throw new Error(data?.message ?? 'Payment could not be started. Please try again.');
-  return { clientSecret: data.clientSecret };
+  if (!data?.ok
+    || typeof data.clientSecret !== 'string'
+    || (data.stripeMode !== 'test' && data.stripeMode !== 'live')) {
+    throw new Error(data?.message ?? 'Payment could not be started. Please try again.');
+  }
+  return { clientSecret: data.clientSecret, stripeMode: data.stripeMode };
 }
 
 export async function getGuestOrderPaymentStatus(orderId: string, paymentCapability: string): Promise<GuestOrderPaymentStatus> {

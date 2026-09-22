@@ -11,7 +11,7 @@ export const checkoutRequestSchema = z.object({
 });
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
 export interface CheckoutResponse { orderId: string; orderNumber: string; subtotal: number; deliveryFee: number; discountAmount: number; taxAmount: number; total: number; currency: string; status: 'pending_payment'; reservationExpiresAt: string; }
-export interface StripePaymentIntentResponse { clientSecret: string; }
+export interface StripePaymentIntentResponse { clientSecret: string; stripeMode: 'test' | 'live'; }
 export interface GuestOrderPaymentStatus {
   orderId: string;
   orderNumber: string;
