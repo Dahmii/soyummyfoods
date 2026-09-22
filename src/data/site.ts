@@ -1,6 +1,6 @@
 export const IMAGERY = {
   hero: "/b4ba3fb1-8dca-4476-b4d3-0b9ebf103f72.jpg",
-  chef: "/1ff23ab8-1c44-4868-b055-54ce889269f7.jpg",
+  chef: "/soyummy-kitchen-chef.png",
   kitchenTeam: "/ab35cf6b-e058-4a8b-9b26-10b78e484f0d.jpg",
 
   spices: "/6e768e1f-69c7-404a-94c1-a2669446d421.jpg",
