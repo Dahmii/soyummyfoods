@@ -28,6 +28,15 @@ function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: strin
   const [isCardSelected, setIsCardSelected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submittingRef = useRef(false);
+  const cardPaymentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isCardSelected) return;
+    cardPaymentRef.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: reduceMotion ? 'auto' : 'smooth'
+    });
+  }, [isCardSelected, reduceMotion]);
 
   async function confirmPayment(onWalletFailure?: () => void) {
     if (!stripe || !elements || submittingRef.current) return;
@@ -62,7 +71,6 @@ function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: strin
     <section aria-labelledby="express-checkout-heading" className="space-y-3">
       <div>
         <h4 id="express-checkout-heading" className="font-display text-base font-bold text-ink">Express checkout</h4>
-        <p className="mt-1 text-sm text-ink/60">Pay faster with an available wallet.</p>
       </div>
       <ExpressCheckoutElement
         options={{
@@ -73,7 +81,6 @@ function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: strin
         onLoadError={() => undefined}
       />
     </section>
-    <div className="relative text-center text-xs text-ink/45 before:absolute before:inset-x-0 before:top-1/2 before:border-t before:border-ink/10"><span className="relative bg-white px-2">or pay another way</span></div>
     <section aria-labelledby="card-payment-heading" className="space-y-3">
       <button
         type="button"
@@ -94,6 +101,7 @@ function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: strin
       </button>
       {isCardSelected ? <motion.div
         id="stripe-card-payment"
+        ref={cardPaymentRef}
         initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}

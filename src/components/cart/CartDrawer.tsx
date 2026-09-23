@@ -93,8 +93,8 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => open ? undefined : closeCart()}>
-      <SheetContent aria-describedby="cart-description">
-        <header className="border-b border-ink/10 bg-white px-5 py-4 pr-14">
+      <SheetContent aria-describedby="cart-description" className="h-[100dvh] max-h-[100dvh] overflow-hidden">
+        <header className="shrink-0 border-b border-ink/10 bg-white px-5 py-4 pr-14">
           <SheetTitle className="font-display text-xl font-bold text-ink">
             {stage === 'payment' ? 'Secure payment' : 'Your basket'}
           </SheetTitle>
@@ -105,6 +105,7 @@ export function CartDrawer() {
           </SheetDescription>
         </header>
 
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {stage === 'payment' && placedOrder ?
         <StripePaymentStep order={placedOrder.order} checkoutAttemptId={placedOrder.checkoutAttemptId} /> :
         stage === 'checkout' ?
@@ -223,6 +224,7 @@ export function CartDrawer() {
             </div>
           </>
         }
+        </div>
       </SheetContent>
     </Sheet>);
 
