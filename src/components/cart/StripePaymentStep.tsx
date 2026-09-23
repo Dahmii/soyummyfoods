@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { AlertCircleIcon, Loader2Icon } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { AlertCircleIcon, CreditCardIcon, Loader2Icon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { CheckoutError, createStripePaymentIntent } from '../../repositories/checkoutRepository';
 import { getPaymentCapability } from '../../lib/paymentCapability';
@@ -22,7 +23,9 @@ interface StripePaymentStepProps {
 function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: string; total: number; onSubmitted: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
+  const reduceMotion = useReducedMotion();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCardSelected, setIsCardSelected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submittingRef = useRef(false);
 
@@ -55,18 +58,54 @@ function PaymentForm({ clientSecret, total, onSubmitted }: { clientSecret: strin
     submittingRef.current = false;
   }
 
-  return <div className="space-y-4">
-    <ExpressCheckoutElement
-      options={{ paymentMethods: { applePay: 'always', googlePay: 'always' } }}
-      onConfirm={(event) => void confirmPayment(() => event.paymentFailed({ reason: 'fail' }))}
-      onLoadError={() => undefined}
-    />
-    <div className="relative text-center text-xs text-ink/45 before:absolute before:inset-x-0 before:top-1/2 before:border-t before:border-ink/10"><span className="relative bg-white px-2">or pay by card</span></div>
-    <PaymentElement options={{ layout: 'tabs' }} />
+  return <div className="space-y-5">
+    <section aria-labelledby="express-checkout-heading" className="space-y-3">
+      <div>
+        <h4 id="express-checkout-heading" className="font-display text-base font-bold text-ink">Express checkout</h4>
+        <p className="mt-1 text-sm text-ink/60">Pay faster with an available wallet.</p>
+      </div>
+      <ExpressCheckoutElement
+        options={{
+          layout: { maxColumns: 1, maxRows: 2, overflow: 'auto' },
+          paymentMethods: { applePay: 'always', googlePay: 'always' }
+        }}
+        onConfirm={(event) => void confirmPayment(() => event.paymentFailed({ reason: 'fail' }))}
+        onLoadError={() => undefined}
+      />
+    </section>
+    <div className="relative text-center text-xs text-ink/45 before:absolute before:inset-x-0 before:top-1/2 before:border-t before:border-ink/10"><span className="relative bg-white px-2">or pay another way</span></div>
+    <section aria-labelledby="card-payment-heading" className="space-y-3">
+      <button
+        type="button"
+        aria-expanded={isCardSelected}
+        aria-controls="stripe-card-payment"
+        onClick={() => setIsCardSelected(true)}
+        disabled={!stripe || !elements || isSubmitting}
+        className="flex w-full items-center justify-between gap-4 rounded-2xl border border-ink/15 bg-white px-4 py-4 text-left shadow-sm transition-colors hover:border-brand-orange/55 hover:bg-brand-orange/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange"><CreditCardIcon className="h-5 w-5" aria-hidden="true" /></span>
+          <span className="min-w-0">
+            <span id="card-payment-heading" className="block font-display text-base font-bold text-ink">Pay with card</span>
+            <span className="mt-0.5 block text-sm text-ink/60">Enter your card details securely with Stripe.</span>
+          </span>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-brand-orange">{isCardSelected ? 'Selected' : 'Choose'}</span>
+      </button>
+      {isCardSelected ? <motion.div
+        id="stripe-card-payment"
+        initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+        className="space-y-4 rounded-2xl border border-ink/10 bg-cream/35 p-4 sm:p-5"
+      >
+        <PaymentElement options={{ layout: 'tabs' }} />
+        <Button type="button" size="lg" className="w-full" disabled={!stripe || !elements || isSubmitting} onClick={() => void confirmPayment()}>
+          {isSubmitting ? <><Loader2Icon className="h-4 w-4 animate-spin" />Submitting payment…</> : `Pay ${formatPrice(total)}`}
+        </Button>
+      </motion.div> : null}
+    </section>
     {error ? <p role="alert" className="flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700"><AlertCircleIcon className="mt-0.5 h-4 w-4 shrink-0" />{error}</p> : null}
-    <Button type="button" size="lg" className="w-full" disabled={!stripe || !elements || isSubmitting} onClick={() => void confirmPayment()}>
-      {isSubmitting ? <><Loader2Icon className="h-4 w-4 animate-spin" />Submitting payment…</> : `Pay ${formatPrice(total)}`}
-    </Button>
   </div>;
 }
 
