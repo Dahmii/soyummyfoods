@@ -1,4 +1,4 @@
-# Soyummy Foods 🍽️
+#### 🍽️ [Soyummy Foods](https://github.com/Dahmii/soyummyfoods)
 
 A full-stack food ordering and management platform built to provide customers with a simple ordering experience while giving administrators the tools to manage the catalogue and ordering workflow.
 
