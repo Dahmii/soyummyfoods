@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   StarIcon,
   ShieldCheckIcon,
@@ -8,7 +8,6 @@ import {
   ArrowRightIcon } from
 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 import { FoodCard } from '../components/menu/FoodCard';
 import { AllergyNotice } from '../components/AllergyNotice';
 import { SectionHeading } from '../components/SectionHeading';
@@ -32,6 +31,7 @@ const TRUST_SIGNALS = [
 
 export function HomePage() {
   const { items } = useMenu();
+  const reduceMotion = useReducedMotion();
   const signatureDishes = items.filter((item) =>
   item.tags.includes('popular')
   ).slice(0, 4);
@@ -39,58 +39,42 @@ export function HomePage() {
   return (
     <div className="w-full bg-cream">
       {/* Hero */}
-      <section className="border-b border-ink/10 bg-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 lg:grid-cols-2 lg:gap-14 lg:px-8 lg:py-20">
+      <section aria-labelledby="home-hero-heading" className="relative isolate flex min-h-[34rem] overflow-hidden bg-ink sm:min-h-[38rem] lg:min-h-[42rem]">
+        <img
+          src={IMAGERY.hero}
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-black/75 via-black/50 to-black/15" />
+        <div className="mx-auto flex w-full max-w-7xl items-end px-5 py-14 sm:px-8 sm:py-16 lg:px-8 lg:py-20">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}>
-            
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-500">
-              Now delivering nationwide across the UK
-            </p>
-            <h1 className="mt-4 font-display text-4xl font-bold leading-[1.08] text-ink sm:text-5xl lg:text-6xl">
-              Taste the Soul of Nigeria, Right Here in the UK
+            transition={{ duration: reduceMotion ? 0 : 0.5, ease: 'easeOut' }}
+            className="relative -top-24 max-w-3xl"
+          >
+            <h1 id="home-hero-heading" className="font-display text-5xl font-semibold leading-[0.98] tracking-[-0.035em] text-white sm:text-6xl lg:text-7xl">
+              Authentic Nigerian Flavours, Made with Love.
             </h1>
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-ink/60 sm:text-base">
-              Savor carefully crafted, authentic Nigerian culinary classics. From
-              aromatic smoky Jollof Rice to rich Ofada Rice &amp; Ayamase, we bring the
-              vibrant flavours of home directly to your table with unparalleled
-              convenience and fresh ingredients.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/menu">Order Now</Link>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="w-full bg-brand-500 text-white hover:bg-brand-600 sm:w-auto">
+                <Link to="/menu">Explore Our Menu</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/menu">Bulk Order</Link>
+              <Button asChild size="lg" variant="outline" className="w-full border-white/65 bg-white/10 text-white hover:border-white hover:bg-white hover:text-ink focus-visible:ring-white sm:w-auto">
+                <a href="#our-story">Our Story</a>
               </Button>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="relative overflow-hidden rounded-2xl shadow-lift">
-            
-            <img
-              src={IMAGERY.hero}
-              alt="A table laid with Nigerian dishes including party jollof rice, egusi soup and beef suya"
-              className="h-full w-full object-cover" />
-            
-            <Badge className="absolute right-4 top-4">100% Authentic Flavours</Badge>
           </motion.div>
         </div>
       </section>
 
       {/* Story */}
-      <section className="border-b border-ink/10 bg-cream">
+      <section id="our-story" className="border-b border-ink/10 bg-cream">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-16 lg:px-8 lg:py-20">
           <div className="relative">
             <div className="absolute -bottom-4 -right-4 hidden h-full w-full rounded-2xl border-2 border-brand-500 lg:block" />
             <img
-              src={IMAGERY.chef}
+              src={IMAGERY.foods}
               alt="A chef preparing fresh vegetables and spices in the SoYummy kitchen"
               className="relative h-full w-full rounded-2xl object-cover shadow-card" />
             
@@ -115,22 +99,7 @@ export function HomePage() {
                 it's about warmth, celebration and absolute delight.
               </p>
             </div>
-            <dl className="mt-8 flex gap-12">
-              <div>
-                <dt className="sr-only">Authentic recipes</dt>
-                <dd className="font-display text-3xl font-bold text-brand-500">100%</dd>
-                <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-ink/50">
-                  Authentic recipes
-                </p>
-              </div>
-              <div>
-                <dt className="sr-only">Happy customers</dt>
-                <dd className="font-display text-3xl font-bold text-brand-500">15k+</dd>
-                <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-ink/50">
-                  Happy customers
-                </p>
-              </div>
-            </dl>
+            
           </div>
         </div>
       </section>
