@@ -27,7 +27,7 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
+        display: ['"Barracuda Script"', 'cursive'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
