@@ -110,7 +110,7 @@ export function HomePage() {
           <SectionHeading
             eyebrow="The classics"
             title="Our Best-Selling Signature Dishes"
-            description="Add any plate straight to your basket — no menus to dig through, no detail pages to open."
+            description=""
             align="center" />
           
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
