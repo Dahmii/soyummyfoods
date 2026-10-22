@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '../lib/supabase';
-import type { AdminCategory, AdminProduct, AdminProductImage, CategoryInput, ProductImageInput, ProductInput } from '../types/catalog';
+import type { AdminCategory, AdminProduct, AdminProductImage, CategoryInput, ProductImageInput, ProductInput, ProductRemovalPlan, ProductRemovalResult } from '../types/catalog';
 
 export const PRODUCT_IMAGE_BUCKET = 'product-images';
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
@@ -51,6 +51,20 @@ export async function saveProduct(input: ProductInput, id?: string): Promise<str
   const client = getSupabaseClient();
   if (id) { const { error } = await client.from('products').update(input).eq('id', id); fail(error); return id; }
   const { data, error } = await client.from('products').insert(input).select('id').single(); fail(error); return data.id as string;
+}
+export async function getAdminProductRemovalPlan(productId: string): Promise<ProductRemovalPlan> {
+  const { data, error } = await getSupabaseClient()
+    .rpc('get_admin_product_removal_plan', { p_product_id: productId })
+    .single();
+  fail(error);
+  return data.removal_action as ProductRemovalPlan;
+}
+export async function removeAdminProduct(productId: string): Promise<ProductRemovalResult> {
+  const { data, error } = await getSupabaseClient()
+    .rpc('remove_admin_product', { p_product_id: productId })
+    .single();
+  fail(error);
+  return data.removal_action as ProductRemovalResult;
 }
 export async function listProductImages(productId: string): Promise<AdminProductImage[]> {
   const { data, error } = await getSupabaseClient().from('product_images').select('*').eq('product_id', productId).order('display_order');

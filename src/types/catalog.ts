@@ -62,6 +62,8 @@ export type ProductImageInput = z.infer<typeof productImageInputSchema>;
 
 export interface AdminCategory extends CategoryInput { id: string; created_at: string; }
 export interface AdminProduct extends ProductInput { id: string; created_at: string; category: { name: string; slug: string; } | null; }
+export type ProductRemovalPlan = 'delete' | 'archive';
+export type ProductRemovalResult = 'deleted' | 'archived';
 export type AdminProductImage = ProductImageInput & {
   id: string;
   product_id: string;
