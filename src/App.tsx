@@ -68,8 +68,8 @@ function AppContent() {
             </Route>
             <Route path="/" element={<HomePage />} />
             <Route path="/menu" element={<MenuPage />} />
-            <Route path="/media" element={<MediaPage />} />
-            <Route path="/blog" element={<BlogPage />} />
+            {/* <Route path="/media" element={<MediaPage />} /> */}
+            {/* <Route path="/blog" element={<BlogPage />} /> */}
             <Route path="/allergy" element={<AllergyPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

@@ -8,8 +8,8 @@ import { cn } from '../../utils/cn';
 const NAV_LINKS = [
 { to: '/', label: 'Home' },
 { to: '/menu', label: 'Menu' },
-{ to: '/media', label: 'Media' },
-{ to: '/blog', label: 'Blog' }];
+{ to: '/media', label: '' },
+{ to: '/blog', label: '' }];
 
 
 export function Header() {
