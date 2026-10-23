@@ -30,6 +30,7 @@ interface ProductRow {
   slug: string;
   name: string;
   description: string;
+  display_order: number;
   base_price: number | string | null;
   sale_price: number | string | null;
   price_on_request: boolean;
@@ -57,7 +58,7 @@ export async function fetchMenuFromSupabase(
     supabase
       .from('products')
       .select(
-        'id, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, storage_bucket, alt_text, is_primary, display_order)'
+        'id, display_order, slug, name, description, base_price, sale_price, price_on_request, portion_note, prep_time_minutes, is_available, tags, category:categories!inner(slug), images:product_images(storage_path, storage_bucket, alt_text, is_primary, display_order)'
       )
       .eq('status', 'active')
       .order('display_order')
@@ -100,6 +101,7 @@ export async function fetchMenuFromSupabase(
 
       return {
         id: product.slug,
+        displayOrder: product.display_order,
         databaseId: product.id,
         name: product.name,
         description: product.description,

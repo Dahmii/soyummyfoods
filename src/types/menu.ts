@@ -6,6 +6,7 @@ export type MenuCategory = z.infer<typeof menuCategorySchema>;
 
 export const menuItemSchema = z.object({
   id: z.string().min(1),
+  displayOrder: z.number().int().nonnegative().default(0),
   databaseId: z.string().uuid().optional(),
   name: z.string().min(1),
   description: z.string().min(1),

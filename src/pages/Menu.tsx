@@ -19,9 +19,12 @@ function sortItems(items: MenuItem[], sort: SortOption): MenuItem[] {
     case 'prep-time':
       return copy.sort((a, b) => a.prepTimeMinutes - b.prepTimeMinutes);
     default:
-      return copy.sort(
-        (a, b) => Number(b.available) - Number(a.available) || (b.rating ?? -Infinity) - (a.rating ?? -Infinity)
-      );
+  return copy.sort(
+    (a, b) =>
+      a.displayOrder - b.displayOrder ||
+      Number(b.available) - Number(a.available) ||
+      (b.rating ?? -Infinity) - (a.rating ?? -Infinity)
+  );
   }
 }
 
