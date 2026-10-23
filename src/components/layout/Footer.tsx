@@ -64,7 +64,7 @@ export function Footer() {
             <li className="flex items-start gap-2.5">
               <MailIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
               <a href="mailto:info@soyummyfood.com" className="hover:text-brand-400">
-                hello@soyummyfoods.co.uk
+                info@soyummyfood.com
               </a>
             </li>
             <li className="flex items-start gap-2.5">
