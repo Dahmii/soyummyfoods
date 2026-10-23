@@ -79,7 +79,8 @@ export function Footer() {
             </li>
             <li className="flex items-start gap-2.5">
               <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
-              <span>Unit 12, Southwark Enterprise Hub, London, SE1 0AA</span>
+              <span>150 Henderson Drive
+DA1 5LQ</span>
             </li>
           </ul>
           <p className="mt-4 text-xs leading-relaxed text-white/40">
