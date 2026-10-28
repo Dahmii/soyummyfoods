@@ -152,8 +152,8 @@ export function TermsAndConditionsPage() {
           </TermsSection>
 
           <TermsSection id="contact" title="20. Contact us">
-            <p>If you have a question about these Terms or an order, please email <a href="mailto:hello@soyummyfoods.co.uk" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">hello@soyummyfoods.co.uk</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
-            <p>You can also write to us at Unit 12, Southwark Enterprise Hub, London, SE1 0AA. This is presented as a contact address only, not as a statement of registered-office status.</p>
+            <p>If you have a question about these Terms or an order, please email <a href="mailto:info@soyummyfood.com" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">info@soyummyfood.com</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
+            <p>You can also write to us at 5 Brayford Square, E1 0SG. This is presented as a contact address only, not as a statement of registered-office status.</p>
           </TermsSection>
 
           <div className="rounded-2xl border border-brand-100 bg-brand-50 p-5 text-sm leading-relaxed text-ink/70">

@@ -145,9 +145,9 @@ export function PrivacyPolicyPage() {
           </PolicySection>
 
           <PolicySection id="contact" title="17. Contact us">
-            {/* CLIENT REVIEW: confirm legal entity and privacy contact details before final publication. */}
-            <p>If you have a question about this Privacy Policy or how SoYummy Foods handles your information, please contact us at <a href="mailto:hello@soyummyfoods.co.uk" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">hello@soyummyfoods.co.uk</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
-            <p>You can also write to us using the contact address displayed in the website footer: Unit 12, Southwark Enterprise Hub, London, SE1 0AA. This is presented as a contact address only, not as a statement of registered-office status.</p>
+            
+            <p>If you have a question about this Privacy Policy or how SoYummy Foods handles your information, please contact us at <a href="mailto:info@soyummyfood.com" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">info@soyummyfood.com</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
+            <p>You can also write to us using the contact address displayed in the website footer: 5 Brayford Square, E1 0SG. This is presented as a contact address only, not as a statement of registered-office status.</p>
           </PolicySection>
 
           <PolicySection id="complaints" title="18. Complaints">

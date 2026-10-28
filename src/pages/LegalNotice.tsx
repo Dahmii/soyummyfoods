@@ -44,7 +44,7 @@ export function LegalNoticePage() {
         </NoticeSection>
 
         <NoticeSection id="contact-information" title="2. Contact information">
-          <p>You can contact SoYummy Foods by email at <a href="mailto:hello@soyummyfoods.co.uk" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">hello@soyummyfoods.co.uk</a>, by telephone on <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>, or by writing to Unit 12, Southwark Enterprise Hub, London, SE1 0AA.</p>
+          <p>You can contact SoYummy Foods by email at <a href="mailto:info@soyummyfood.com" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">info@soyummyfood.com</a>, by telephone on <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>, or by writing to 5 Brayford Square E1 0SG.</p>
           <p>The address is provided as a business contact address only and is not presented as a registered-office address.</p>
         </NoticeSection>
 
@@ -90,8 +90,8 @@ export function LegalNoticePage() {
         </NoticeSection>
 
         <NoticeSection id="contact" title="10. Contact us">
-          <p>If you have a question about this Legal Notice, please email <a href="mailto:hello@soyummyfoods.co.uk" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">hello@soyummyfoods.co.uk</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
-          <p>You can also write to SoYummy Foods at Unit 12, Southwark Enterprise Hub, London, SE1 0AA.</p>
+          <p>If you have a question about this Legal Notice, please email <a href="mailto:info@soyummyfood.com" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">info@soyummyfood.com</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a>.</p>
+          <p>You can also write to SoYummy Foods at 5 Brayford Square, E1 0SG.</p>
         </NoticeSection>
       </article>
     </div>

@@ -128,8 +128,8 @@ export function RefundPolicyPage() {
           </RefundSection>
 
           <RefundSection id="contact" title="15. Contact us">
-            <p>Please email <a href="mailto:hello@soyummyfoods.co.uk" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">hello@soyummyfoods.co.uk</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a> with any order concern.</p>
-            <p>You can also write to us at Unit 12, Southwark Enterprise Hub, London, SE1 0AA. For related information, see our <Link to="/terms-and-conditions" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Terms &amp; Conditions</Link> and <Link to="/privacy-policy" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Privacy Policy</Link>.</p>
+            <p>Please email <a href="mailto:info@soyummyfood.com" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">info@soyummyfood.com</a> or call <a href="tel:+442079460192" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">+44 20 7946 0192</a> with any order concern.</p>
+            <p>You can also write to us at 5 Brayford Square, E1 0SG. For related information, see our <Link to="/terms-and-conditions" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Terms &amp; Conditions</Link> and <Link to="/privacy-policy" className="font-semibold text-brand-700 underline decoration-brand-300 underline-offset-2 hover:text-brand-600">Privacy Policy</Link>.</p>
           </RefundSection>
         </article>
       </div>
