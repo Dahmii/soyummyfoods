@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '../lib/supabase';
 import type { AdminCategory, AdminProduct, AdminProductImage, CategoryInput, ProductImageInput, ProductInput, ProductRemovalPlan, ProductRemovalResult } from '../types/catalog';
 
+
 export const PRODUCT_IMAGE_BUCKET = 'product-images';
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 

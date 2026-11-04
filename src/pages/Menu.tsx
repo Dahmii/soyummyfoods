@@ -182,7 +182,7 @@ export function MenuPage() {
             }
             </section>
 
-            <CateringPriceList />
+            <CateringPriceList menuItems={items} />
           </>
         }
       </div>
