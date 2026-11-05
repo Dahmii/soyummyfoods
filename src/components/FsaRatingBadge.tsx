@@ -1,26 +1,37 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface FsaRatingBadgeProps {
   businessId: string;
-  ratingStyle?: '1' | '2' | '3' | '4';
   welsh?: boolean;
 }
 
-export function FsaRatingBadge({
-  businessId,
-  ratingStyle = '1',
-  welsh = false,
-}: FsaRatingBadgeProps) {
+export function FsaRatingBadge({ businessId, welsh = false }: FsaRatingBadgeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 640; // matches Tailwind's 'sm' breakpoint
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)');
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+    return () => mediaQuery.removeEventListener('change', handleMediaQueryChange);
+  }, []);
+
+  const ratingStyle = isMobile ? '3' : '1';
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Clear any previously injected content on re-renders
+    // Reset container contents
     container.innerHTML = '';
 
-    // Create and configure script tag using vanilla DOM API so the browser executes it
+    // Create and configure script
     const script = document.createElement('script');
     script.src = 'https://ratings.food.gov.uk/embed/embed-badge.js';
     script.async = true;

@@ -209,7 +209,7 @@ export function MenuPage() {
       </div>
 
       <div className="flex justify-center pb-12">
-        <FsaRatingBadge businessId="1659117" ratingStyle="1" welsh={false} />
+        <FsaRatingBadge businessId="1659117" welsh={false} />
       </div>
     </div>
   );
