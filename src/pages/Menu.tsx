@@ -8,6 +8,7 @@ import { SectionHeading } from '../components/SectionHeading';
 import { Button } from '../components/ui/button';
 import { useMenu } from '../hooks/useMenu';
 import { effectivePrice, type MenuItem, type SortOption } from '../types/menu';
+import { FsaRatingBadge } from '../components/FsaRatingBadge';
 
 function sortItems(items: MenuItem[], sort: SortOption): MenuItem[] {
   const copy = [...items];
@@ -69,6 +70,7 @@ export function MenuPage() {
 
       <div className="mx-auto max-w-7xl space-y-14 px-5 py-12 lg:px-8 lg:py-16">
         <AllergyNotice />
+
 
         <MenuFilters
           query={query}
@@ -186,6 +188,10 @@ export function MenuPage() {
           </>
         }
       </div>
+
+      <div className="flex justify-center">
+          <FsaRatingBadge businessId="1659117" ratingStyle="1" welsh={false} />
+        </div>
     </div>);
 
 }
@@ -218,6 +224,7 @@ function MenuSection({ icon, eyebrow, title, description, items }: MenuSectionPr
         <FoodCard key={`${title}-${item.id}`} item={item} />
         )}
       </div>
+      
     </section>);
 
 }
