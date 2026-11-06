@@ -13,6 +13,7 @@ import { AllergyNotice } from '../components/AllergyNotice';
 import { SectionHeading } from '../components/SectionHeading';
 import { IMAGERY } from '../data/site';
 import { useMenu } from '../hooks/useMenu';
+import { FsaRatingBadge } from '../components/FsaRatingBadge';
 
 const TRUST_SIGNALS = [
 {
@@ -137,7 +138,7 @@ export function HomePage() {
 
       {/* Trust bar */}
       <section aria-label="Trust and certifications" className="bg-cream">
-        <ul className="mx-auto grid max-w-7xl gap-4 px-5 py-8 sm:grid-cols-3 lg:px-8">
+        {/* <ul className="mx-auto grid max-w-7xl gap-4 px-5 py-8 sm:grid-cols-3 lg:px-8">
           {TRUST_SIGNALS.map(({ Icon, label }) =>
           <li
             key={label}
@@ -147,7 +148,11 @@ export function HomePage() {
               {label}
             </li>
           )}
-        </ul>
+        </ul> */}
+
+        <div className="flex justify-center pb-12">
+                <FsaRatingBadge businessId="1659117" welsh={false} />
+              </div>
       </section>
 
       {/* Quote band */}
